@@ -1,0 +1,25 @@
+{
+  "name": "mips-asm2bin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.0.3"
+  },
+  "devDependencies": {
+    "browserify": "^16.5.2",
+    "cz-conventional-changelog": "^3.3.0",
+    "jest": "^26.4.2",
+    "ts-jest": "^26.4.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
