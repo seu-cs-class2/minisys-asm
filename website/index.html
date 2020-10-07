@@ -1,12 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <script src="../dist/adapter/bundle.js"></script>
-</head>
-<body>
-  
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="./lib/ace.js"></script>
+    <link rel="stylesheet" href="./lib/buttons.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Minisys 汇编器（在线版）</title>
+  </head>
+  <body>
+    <div class="header">
+      <p class="title">Minisys 汇编器（在线版）</p>
+      <a id="github-link" target="_blank" href="https://github.com/seu-cs-class2/minisys-asm">GitHub</a>
+    </div>
+    <div class="content">
+      <div class="left">
+        <div id="editor"></div>
+      </div>
+      <div class="right">
+        <div class="status">
+          <span>汇编状态：</span>
+          <span id="asm-status">等待中...</span>
+          <p id="asm-failTrace"></p>
+        </div>
+        <div class="result">
+          <textarea rows="25" id="asm-result"></textarea>
+        </div>
+        <div class="ops">
+          <span id="asm-lastModified"></span>
+          <button class="button button-3d button-primary button-rounded" id="asm-assemble">汇编！</button>
+          <button class="button button-3d button-action button-rounded" id="asm-download">下载.coe文件</button>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    ;(function (global) {
+      const editor = ace.edit('editor')
+      editor.setTheme('ace/theme/github')
+      editor.session.setMode('ace/mode/mips')
+      editor.setFontSize(18)
+
+      global.editor = editor
+    })(window)
+  </script>
+  <script src="./bundle.js"></script>
 </html>

@@ -1,4 +1,13 @@
 /**
+ * Ensure `ensure`, else throw `Error(hint)`.
+ */
+export function assert(ensure: unknown, hint?: string) {
+  if (!ensure) {
+    throw new Error(hint)
+  }
+}
+
+/**
  * 将十进制数转为二进制，用pad补齐到len位
  */
 export function decToBin(dec: number, len: number, pad: '0' | '1' = '0') {
@@ -29,6 +38,13 @@ export function decToHex(dec: number, len: number, zeroX = true) {
 }
 
 /**
+ * 十六进制转十进制
+ */
+export function hexToDec(hex: string) {
+  return parseInt(hex, 16)
+}
+
+/**
  * 将十六进制每位转换为4位二进制，参数带不带0x头都可以
  */
 export function hexToBin(hex: string) {
@@ -50,4 +66,36 @@ export function hexToBin(hex: string) {
  */
 export function serialString(bin: string) {
   return bin.replace(/\s+/g, '')
+}
+
+/**
+ * 算地址偏移量
+ */
+export function getOffset(holder: {
+  byte?: number
+  half?: number
+  word?: number
+  space?: number
+  instruction?: number
+}) {
+  const WORD_LEN = 32
+  const HALF_LEN = WORD_LEN / 2
+  const BYTE_LEN = 8
+  const INS_LEN = WORD_LEN
+  return (
+    (holder.byte || 0) * BYTE_LEN +
+    (holder.half || 0) * HALF_LEN +
+    (holder.word || 0) * WORD_LEN +
+    (holder.space || 0) +
+    (holder.instruction || 0) * INS_LEN
+  )
+}
+
+/**
+ * 算偏移后的地址
+ * @param baseAddr 基地址，十六进制或十进制
+ */
+export function getOffsetAddr(baseAddr: string, offsetBit: number) {
+  let base = baseAddr.startsWith('0x') ? hexToDec(baseAddr) : Number(baseAddr)
+  return base + offsetBit
 }

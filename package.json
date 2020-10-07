@@ -4,18 +4,26 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build-node": "tsc",
+    "build-browser": "webpack",
     "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "typescript": "^4.0.3"
+    "minimist": "^1.2.5"
   },
   "devDependencies": {
     "browserify": "^16.5.2",
     "cz-conventional-changelog": "^3.3.0",
+    "html-webpack-plugin": "^4.5.0",
     "jest": "^26.4.2",
-    "ts-jest": "^26.4.1"
+    "ts-jest": "^26.4.1",
+    "ts-loader": "^8.0.4",
+    "typescript": "^4.0.3",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   },
   "config": {
     "commitizen": {

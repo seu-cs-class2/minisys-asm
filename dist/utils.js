@@ -1,6 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.serialString = exports.hexToBin = exports.decToHex = exports.binToHex = exports.decToBin = void 0;
+/**
+ * Ensure `ensure`, else throw `Error(hint)`.
+ */
+function assert(ensure, hint) {
+    if (!ensure) {
+        throw new Error(hint);
+    }
+}
+exports.assert = assert;
 /**
  * 将十进制数转为二进制，用pad补齐到len位
  */
@@ -33,6 +41,13 @@ function decToHex(dec, len, zeroX) {
 }
 exports.decToHex = decToHex;
 /**
+ * 十六进制转十进制
+ */
+function hexToDec(hex) {
+    return parseInt(hex, 16);
+}
+exports.hexToDec = hexToDec;
+/**
  * 将十六进制每位转换为4位二进制，参数带不带0x头都可以
  */
 function hexToBin(hex) {
@@ -56,3 +71,27 @@ function serialString(bin) {
     return bin.replace(/\s+/g, '');
 }
 exports.serialString = serialString;
+/**
+ * 算地址偏移量
+ */
+function getOffset(holder) {
+    var WORD_LEN = 32;
+    var HALF_LEN = WORD_LEN / 2;
+    var BYTE_LEN = 8;
+    var INS_LEN = WORD_LEN;
+    return ((holder.byte || 0) * BYTE_LEN +
+        (holder.half || 0) * HALF_LEN +
+        (holder.word || 0) * WORD_LEN +
+        (holder.space || 0) +
+        (holder.instruction || 0) * INS_LEN);
+}
+exports.getOffset = getOffset;
+/**
+ * 算偏移后的地址
+ * @param baseAddr 基地址，十六进制或十进制
+ */
+function getOffsetAddr(baseAddr, offsetBit) {
+    var base = baseAddr.startsWith('0x') ? hexToDec(baseAddr) : Number(baseAddr);
+    return base + offsetBit;
+}
+exports.getOffsetAddr = getOffsetAddr;
