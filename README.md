@@ -1,3 +1,12 @@
-# minisys-asm
+# minisys-asm - Minisys 汇编器
 
-Minisys汇编器在线版：http://zxuuu.tech/minisys/asm/
+## 在线版
+
+http://zxuuu.tech/minisys/asm/
+
+## CLI
+
+```bash
+$ node dist/node.js [in_file] [out_dir]
+```
+

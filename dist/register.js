@@ -4,6 +4,7 @@
  * by z0gSh1u @ 2020-10
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.regToBin = void 0;
 var utils_1 = require("./utils");
 // prettier-ignore
 var registerNames = [

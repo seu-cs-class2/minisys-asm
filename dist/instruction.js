@@ -4,6 +4,7 @@
  * by z0gSh1u @ 2020-10
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MinisysInstructions = exports.Instruction = void 0;
 var utils_1 = require("./utils");
 // 指令类
 var Instruction = /** @class */ (function () {
@@ -23,7 +24,7 @@ var Instruction = /** @class */ (function () {
         set: function (symbol) {
             this._symbol = symbol;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Instruction.prototype, "desc", {
@@ -33,7 +34,7 @@ var Instruction = /** @class */ (function () {
         set: function (desc) {
             this._desc = desc;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Instruction.prototype, "pseudo", {
@@ -43,7 +44,7 @@ var Instruction = /** @class */ (function () {
         set: function (pseudo) {
             this._pseudo = pseudo;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Instruction.prototype, "components", {
@@ -53,7 +54,7 @@ var Instruction = /** @class */ (function () {
         set: function (components) {
             this._components = components;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Instruction.prototype.setComponent = function (desc, val) {

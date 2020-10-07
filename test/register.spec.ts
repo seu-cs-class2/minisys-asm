@@ -1,4 +1,4 @@
-import { regToBin } from '../package/Register'
+import { regToBin } from '../package/register'
 
 describe('Register.ts', () => {
   describe('regToBin', () => {

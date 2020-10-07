@@ -11,6 +11,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseOneLine = exports.assemble = void 0;
 var instruction_1 = require("./instruction");
 var register_1 = require("./register");
 var utils_1 = require("./utils");
@@ -23,14 +24,14 @@ var DataSeg = /** @class */ (function () {
         get: function () {
             return this._startAddr;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(DataSeg.prototype, "vars", {
         get: function () {
             return this._vars;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     DataSeg.prototype.newVar = function (name, comps) {
@@ -56,21 +57,21 @@ var TextSeg = /** @class */ (function () {
         get: function () {
             return this._startAddr;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(TextSeg.prototype, "ins", {
         get: function () {
             return this._ins;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(TextSeg.prototype, "labels", {
         get: function () {
             return this._labels;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     TextSeg.prototype.toBinary = function () {
@@ -155,6 +156,7 @@ function parseTextSeg(asm_) {
             return v;
         if (/(.+):\s+(.+)/.test(v)) {
             utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label: " + RegExp.$1);
+            // FIXME: 地址4字节对齐？
             labels.push({ name: RegExp.$1, lineno: i, addr: utils_1.getOffsetAddr(startAddr, utils_1.getOffset({ instruction: i - 1 })) });
             return RegExp.$2;
         }
@@ -162,7 +164,7 @@ function parseTextSeg(asm_) {
     });
     var ins = [];
     asm.forEach(function (v, i) {
-        i !== 0 && ins.push(parseOneLine(v, labels));
+        i !== 0 && ins.push(parseOneLine(v, labels, i));
     });
     return new TextSeg(startAddr, ins, labels);
 }
@@ -209,12 +211,13 @@ function literalToBin(literal, len, pad) {
 /**
  * 解析单行汇编到Instruction对象
  */
-function parseOneLine(asm, labels) {
+function parseOneLine(asm, labels, lineno) {
     var asmSplit = asm.trim().replace(/,/g, ' ').split(/\s+/);
+    utils_1.assert(asmSplit.every(function (v) { return v.length; }), "\u5B58\u5728\u7A7A\u53C2\u6570\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     // 处理助记符
     var symbol = asmSplit[0];
     var instructionIndex = instruction_1.MinisysInstructions.findIndex(function (x) { return x.symbol == symbol; });
-    utils_1.assert(instructionIndex !== -1, "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol);
+    utils_1.assert(instructionIndex !== -1, "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol + "\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     var res = instruction_1.Instruction.newInstance(instruction_1.MinisysInstructions[instructionIndex]);
     // 填充参数
     var params = asmSplit.slice(1);
@@ -223,9 +226,8 @@ function parseOneLine(asm, labels) {
         if (labels.some(function (x) { return x.name === v; })) {
             return String(labels.find(function (x) { return x.name === v; }).addr);
         }
-        console.log(v);
         if (v.match(/^[A-Za-z][A-Za-z0-9]*$/)) {
-            utils_1.assert(false, "\u6CA1\u9053\u7406\u7684\u53C2\u6570: " + v);
+            utils_1.assert(false, "\u6CA1\u9053\u7406\u7684\u53C2\u6570: " + v + "\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
         }
         return v;
     });

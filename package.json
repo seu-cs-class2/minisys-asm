@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-node": "tsc",
-    "build-browser": "webpack",
+    "clean": "node script/clean.js",
+    "build:all": "npm run clean && npm run build:node && npm run build:browser",
+    "build:node": "tsc",
+    "build:browser": "webpack",
     "test": "jest"
   },
   "author": "",

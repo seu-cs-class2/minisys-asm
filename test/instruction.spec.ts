@@ -1,4 +1,4 @@
-import { MinisysInstructions } from '../package/Instruction'
+import { MinisysInstructions } from '../package/instruction'
 
 describe('Instruction.ts', () => {
   describe('MinisysInstructions', () => {

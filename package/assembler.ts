@@ -203,6 +203,7 @@ function parseTextSeg(asm_: string[]) {
         labels.every(label => label.name !== RegExp.$1),
         `存在重复的label: ${RegExp.$1}`
       )
+      // FIXME: 地址4字节对齐？
       labels.push({ name: RegExp.$1, lineno: i, addr: getOffsetAddr(startAddr, getOffset({ instruction: i - 1 })) })
       return RegExp.$2
     }
@@ -211,7 +212,7 @@ function parseTextSeg(asm_: string[]) {
 
   let ins: Instruction[] = []
   asm.forEach((v, i) => {
-    i !== 0 && ins.push(parseOneLine(v, labels))
+    i !== 0 && ins.push(parseOneLine(v, labels, i))
   })
 
   return new TextSeg(startAddr, ins, labels)
@@ -262,13 +263,17 @@ function literalToBin(literal: string, len: number, pad: '0' | '1' = '0') {
 /**
  * 解析单行汇编到Instruction对象
  */
-export function parseOneLine(asm: string, labels: TextSegLabel[]) {
+export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number) {
   const asmSplit = asm.trim().replace(/,/g, ' ').split(/\s+/)
+  assert(
+    asmSplit.every(v => v.length),
+    `存在空参数，在第 ${lineno} 行。`
+  )
 
   // 处理助记符
   const symbol = asmSplit[0]
   const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
-  assert(instructionIndex !== -1, `没有找到指令助记符：${symbol}`)
+  assert(instructionIndex !== -1, `没有找到指令助记符：${symbol}，在第 ${lineno} 行。`)
 
   let res = Instruction.newInstance(MinisysInstructions[instructionIndex])
   // 填充参数
@@ -278,9 +283,8 @@ export function parseOneLine(asm: string, labels: TextSegLabel[]) {
     if (labels.some(x => x.name === v)) {
       return String(labels.find(x => x.name === v)!.addr)
     }
-    console.log(v)
     if (v.match(/^[A-Za-z][A-Za-z0-9]*$/)) {
-      assert(false, `没道理的参数: ${v}`)
+      assert(false, `没道理的参数: ${v}，在第 ${lineno} 行。`)
     }
     return v
   })
