@@ -1,4 +1,4 @@
-import { parseOneLine } from '../package/AsmParser'
+import { parseOneLine } from '../package/assembler'
 import { serialString } from '../package/utils'
 
 describe('AsmParser.ts', () => {
