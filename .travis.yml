@@ -1,17 +1,23 @@
 language: node_js
 node_js:
   - '12'
-
 cache:
   directories:
     - node_modules
-
 install:
   - npm install
-
 script:
   - npm run test
-
+  - npm run build:all
 branches:
   only:
     - master
+before_install:
+  - openssl aes-256-cbc -K $encrypted_9b2d7e19d83c_key -iv $encrypted_9b2d7e19d83c_iv -in id_rsa.enc -out ~/.ssh/id_rsa -d
+  - eval "$(ssh-agent -s)"
+  - chmod 600 ~/.ssh/id_rsa
+  - ssh-add ~/.ssh/id_rsa
+addons:
+  ssh_known_hosts: 101.132.143.124
+after_success:
+  - ssh root@101.132.143.124 "/var/www/auto_deploy/minisys_asm/deploy.sh"
