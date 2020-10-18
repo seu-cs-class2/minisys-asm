@@ -75,6 +75,7 @@ exports.serialString = serialString;
 /**
  * 算地址偏移量
  */
+// FIXME: space到底占多少字节？ 
 function getOffset(holder) {
     var WORD_LEN = 32;
     var HALF_LEN = WORD_LEN / 2;

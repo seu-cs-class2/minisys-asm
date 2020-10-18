@@ -1,0 +1,325 @@
+{
+  "dataSeg": {
+    "_startAddr": "0x100000",
+    "_vars": [
+      {
+        "name": "buf",
+        "comps": [
+          {
+            "type": "word",
+            "val": "0x000000ff"
+          },
+          {
+            "type": "word",
+            "val": "0x55005500"
+          }
+        ]
+      },
+      {
+        "name": "buf2",
+        "comps": [
+          {
+            "type": "byte",
+            "val": "1"
+          },
+          {
+            "type": "ascii",
+            "val": "\"hello\""
+          }
+        ]
+      }
+    ]
+  },
+  "textSeg": {
+    "_startAddr": "0x123456",
+    "_ins": [
+      {
+        "_symbol": "addi",
+        "_desc": "加立即数",
+        "_pseudo": "(rt)←(rs)+(sign-extend)immediate",
+        "_components": [
+          {
+            "lBit": 31,
+            "rBit": 26,
+            "desc": "op",
+            "type": "fixed",
+            "val": "001000"
+          },
+          {
+            "lBit": 25,
+            "rBit": 21,
+            "desc": "rs",
+            "type": "reg",
+            "val": "01000"
+          },
+          {
+            "lBit": 20,
+            "rBit": 16,
+            "desc": "rt",
+            "type": "reg",
+            "val": "00000"
+          },
+          {
+            "lBit": 15,
+            "rBit": 0,
+            "desc": "immediate",
+            "type": "immed",
+            "val": "0000000000000000"
+          }
+        ]
+      },
+      {
+        "_symbol": "lw",
+        "_desc": "取字",
+        "_pseudo": "(rt)←Memory[(rs)+(sign_extend)offset]",
+        "_components": [
+          {
+            "lBit": 31,
+            "rBit": 26,
+            "desc": "op",
+            "type": "fixed",
+            "val": "100011"
+          },
+          {
+            "lBit": 25,
+            "rBit": 21,
+            "desc": "rs",
+            "type": "reg",
+            "val": "00010"
+          },
+          {
+            "lBit": 20,
+            "rBit": 16,
+            "desc": "rt",
+            "type": "reg",
+            "val": "01000"
+          },
+          {
+            "lBit": 15,
+            "rBit": 0,
+            "desc": "offset",
+            "type": "offset",
+            "val": "0000000000010100"
+          }
+        ]
+      },
+      {
+        "_symbol": "addi",
+        "_desc": "加立即数",
+        "_pseudo": "(rt)←(rs)+(sign-extend)immediate",
+        "_components": [
+          {
+            "lBit": 31,
+            "rBit": 26,
+            "desc": "op",
+            "type": "fixed",
+            "val": "001000"
+          },
+          {
+            "lBit": 25,
+            "rBit": 21,
+            "desc": "rs",
+            "type": "reg",
+            "val": "01000"
+          },
+          {
+            "lBit": 20,
+            "rBit": 16,
+            "desc": "rt",
+            "type": "reg",
+            "val": "01000"
+          },
+          {
+            "lBit": 15,
+            "rBit": 0,
+            "desc": "immediate",
+            "type": "immed",
+            "val": "0000000000000100"
+          }
+        ]
+      },
+      {
+        "_symbol": "lw",
+        "_desc": "取字",
+        "_pseudo": "(rt)←Memory[(rs)+(sign_extend)offset]",
+        "_components": [
+          {
+            "lBit": 31,
+            "rBit": 26,
+            "desc": "op",
+            "type": "fixed",
+            "val": "100011"
+          },
+          {
+            "lBit": 25,
+            "rBit": 21,
+            "desc": "rs",
+            "type": "reg",
+            "val": "00011"
+          },
+          {
+            "lBit": 20,
+            "rBit": 16,
+            "desc": "rt",
+            "type": "reg",
+            "val": "01000"
+          },
+          {
+            "lBit": 15,
+            "rBit": 0,
+            "desc": "offset",
+            "type": "offset",
+            "val": "0000000000010100"
+          }
+        ]
+      },
+      {
+        "_symbol": "add",
+        "_desc": "按字加法",
+        "_pseudo": "(rd)←(rs)+(rt)",
+        "_components": [
+          {
+            "lBit": 31,
+            "rBit": 26,
+            "desc": "op",
+            "type": "fixed",
+            "val": "000000"
+          },
+          {
+            "lBit": 25,
+            "rBit": 21,
+            "desc": "rs",
+            "type": "reg",
+            "val": "00010"
+          },
+          {
+            "lBit": 20,
+            "rBit": 16,
+            "desc": "rt",
+            "type": "reg",
+            "val": "00010"
+          },
+          {
+            "lBit": 15,
+            "rBit": 11,
+            "desc": "rd",
+            "type": "reg",
+            "val": "00011"
+          },
+          {
+            "lBit": 10,
+            "rBit": 6,
+            "desc": "shamt",
+            "type": "fixed",
+            "val": "00000"
+          },
+          {
+            "lBit": 5,
+            "rBit": 0,
+            "desc": "func",
+            "type": "fixed",
+            "val": "100000"
+          }
+        ]
+      },
+      {
+        "_symbol": "addi",
+        "_desc": "加立即数",
+        "_pseudo": "(rt)←(rs)+(sign-extend)immediate",
+        "_components": [
+          {
+            "lBit": 31,
+            "rBit": 26,
+            "desc": "op",
+            "type": "fixed",
+            "val": "001000"
+          },
+          {
+            "lBit": 25,
+            "rBit": 21,
+            "desc": "rs",
+            "type": "reg",
+            "val": "01000"
+          },
+          {
+            "lBit": 20,
+            "rBit": 16,
+            "desc": "rt",
+            "type": "reg",
+            "val": "01000"
+          },
+          {
+            "lBit": 15,
+            "rBit": 0,
+            "desc": "immediate",
+            "type": "immed",
+            "val": "0000000000000100"
+          }
+        ]
+      },
+      {
+        "_symbol": "sw",
+        "_desc": "存字",
+        "_pseudo": "Memory[(rs)+(sign_extend)offset]←(rt)",
+        "_components": [
+          {
+            "lBit": 31,
+            "rBit": 26,
+            "desc": "op",
+            "type": "fixed",
+            "val": "101011"
+          },
+          {
+            "lBit": 25,
+            "rBit": 21,
+            "desc": "rs",
+            "type": "reg",
+            "val": "00010"
+          },
+          {
+            "lBit": 20,
+            "rBit": 16,
+            "desc": "rt",
+            "type": "reg",
+            "val": "01000"
+          },
+          {
+            "lBit": 15,
+            "rBit": 0,
+            "desc": "offset",
+            "type": "offset",
+            "val": "0000000000010100"
+          }
+        ]
+      },
+      {
+        "_symbol": "j",
+        "_desc": "无条件跳转",
+        "_pseudo": "(PC)←((Zero-Extend)address<<2)",
+        "_components": [
+          {
+            "lBit": 31,
+            "rBit": 26,
+            "desc": "op",
+            "type": "fixed",
+            "val": "000010"
+          },
+          {
+            "lBit": 25,
+            "rBit": 0,
+            "desc": "target",
+            "type": "addr",
+            "val": "00000100100011010001010110"
+          }
+        ]
+      }
+    ],
+    "_labels": [
+      {
+        "name": "start",
+        "lineno": 1,
+        "addr": 1193046
+      }
+    ]
+  }
+}

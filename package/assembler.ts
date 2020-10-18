@@ -133,8 +133,8 @@ function parseDataSeg(asm: string[]) {
   // 解析初始化值
   const parseInitValue = (init: string) => init.split(/\s*,/).map(v => v.trim())
 
-  const startAddr = asm[0].split(/\s+/)[1]
-  assert(asm[0].split(/\s+/).length === 2, '数据段首声明非法。')
+  const startAddr = asm[0].split(/\s+/)[1] || "0"
+  assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。')
 
   const VarStartPattern = /(.+):\s+\.(word|byte|half|ascii|space)\s+(.+)/
   const VarContdPattern = /\.(word|byte|half|ascii|space)\s+(.+)/
@@ -192,7 +192,8 @@ function parseDataSeg(asm: string[]) {
  */
 function parseTextSeg(asm_: string[]) {
   let asm = Array.from(asm_)
-  const startAddr = asm[0].split(/\s+/)[1]
+  const startAddr = asm[0].split(/\s+/)[1] || "0"
+  assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。')
 
   // 先提取掉所有的label
   let labels: TextSegLabel[] = []
@@ -232,7 +233,7 @@ export function assemble(asm_: string) {
     .filter(x => x.trim())
     .map(x => x.trim().replace(/\s+/g, ' ').replace(/,\s*/, ', ').toLowerCase())
 
-  const dataSegStartLine = asm.findIndex(v => v.match(/\.data\s+(.+)/))
+  const dataSegStartLine = asm.findIndex(v => v.match(/\.data/))
   const textSegStartLine = asm.findIndex(v => v.match(/\.text/))
   assert(dataSegStartLine !== -1, '未找到数据段开始。')
   assert(textSegStartLine !== -1, '未找到代码段开始。')

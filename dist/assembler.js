@@ -92,8 +92,8 @@ exports.TextSeg = TextSeg;
 function parseDataSeg(asm) {
     // 解析初始化值
     var parseInitValue = function (init) { return init.split(/\s*,/).map(function (v) { return v.trim(); }); };
-    var startAddr = asm[0].split(/\s+/)[1];
-    utils_1.assert(asm[0].split(/\s+/).length === 2, '数据段首声明非法。');
+    var startAddr = asm[0].split(/\s+/)[1] || "0";
+    utils_1.assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。');
     var VarStartPattern = /(.+):\s+\.(word|byte|half|ascii|space)\s+(.+)/;
     var VarContdPattern = /\.(word|byte|half|ascii|space)\s+(.+)/;
     var vars = [], comps = [], name;
@@ -150,13 +150,14 @@ function parseDataSeg(asm) {
  */
 function parseTextSeg(asm_) {
     var asm = Array.from(asm_);
-    var startAddr = asm[0].split(/\s+/)[1];
+    var startAddr = asm[0].split(/\s+/)[1] || "0";
+    utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
     // 先提取掉所有的label
     var labels = [];
     asm = asm.map(function (v, i) {
         if (i === 0)
             return v;
-        if (/(.+):\s+(.+)/.test(v)) {
+        if (/(.+):\s*(.+)/.test(v)) {
             utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label: " + RegExp.$1);
             // FIXME: 地址4字节对齐？
             // FIXME: 地址计算不正确
@@ -183,8 +184,8 @@ function assemble(asm_) {
         .split('\n')
         .filter(function (x) { return x.trim(); })
         .map(function (x) { return x.trim().replace(/\s+/g, ' ').replace(/,\s*/, ', ').toLowerCase(); });
-    var dataSegStartLine = asm.findIndex(function (v) { return v.match(/\.data\s+(.+)/); });
-    var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text\s*/); });
+    var dataSegStartLine = asm.findIndex(function (v) { return v.match(/\.data/); });
+    var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text/); });
     utils_1.assert(dataSegStartLine !== -1, '未找到数据段开始。');
     utils_1.assert(textSegStartLine !== -1, '未找到代码段开始。');
     utils_1.assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后。');

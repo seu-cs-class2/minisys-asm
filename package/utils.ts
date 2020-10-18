@@ -71,6 +71,7 @@ export function serialString(bin: string) {
 /**
  * 算地址偏移量
  */
+// FIXME: space到底占多少字节？ 
 export function getOffset(holder: {
   byte?: number
   half?: number
