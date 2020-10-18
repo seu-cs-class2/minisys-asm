@@ -198,7 +198,7 @@ function parseTextSeg(asm_: string[]) {
   let labels: TextSegLabel[] = []
   asm = asm.map((v, i) => {
     if (i === 0) return v
-    if (/(.+):\s+(.+)/.test(v)) {
+    if (/(.+):\s*(.+)/.test(v)) {
       assert(
         labels.every(label => label.name !== RegExp.$1),
         `存在重复的label: ${RegExp.$1}`
@@ -227,12 +227,13 @@ export function assemble(asm_: string) {
   // 格式化之。去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格
   const asm = asm_
     .replace(/\r\n/g, '\n')
+    .replace(/:\s*\n/g, ': ')
     .split('\n')
     .filter(x => x.trim())
     .map(x => x.trim().replace(/\s+/g, ' ').replace(/,\s*/, ', ').toLowerCase())
 
   const dataSegStartLine = asm.findIndex(v => v.match(/\.data\s+(.+)/))
-  const textSegStartLine = asm.findIndex(v => v.match(/\.text\s+(.+)/))
+  const textSegStartLine = asm.findIndex(v => v.match(/\.text/))
   assert(dataSegStartLine !== -1, '未找到数据段开始。')
   assert(textSegStartLine !== -1, '未找到代码段开始。')
   assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后。')

@@ -179,11 +179,12 @@ function assemble(asm_) {
     // 格式化之。去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格
     var asm = asm_
         .replace(/\r\n/g, '\n')
+        .replace(/:\s*\n/g, ': ')
         .split('\n')
         .filter(function (x) { return x.trim(); })
         .map(function (x) { return x.trim().replace(/\s+/g, ' ').replace(/,\s*/, ', ').toLowerCase(); });
     var dataSegStartLine = asm.findIndex(function (v) { return v.match(/\.data\s+(.+)/); });
-    var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text\s+(.+)/); });
+    var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text\s*/); });
     utils_1.assert(dataSegStartLine !== -1, '未找到数据段开始。');
     utils_1.assert(textSegStartLine !== -1, '未找到代码段开始。');
     utils_1.assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后。');
