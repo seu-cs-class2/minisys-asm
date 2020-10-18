@@ -228,6 +228,7 @@ export function assemble(asm_: string) {
   // 格式化之。去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格
   const asm = asm_
     .replace(/\r\n/g, '\n')
+    .replace(/#(.*)\n/g, '\n')
     .replace(/:\s*\n/g, ': ')
     .split('\n')
     .filter(x => x.trim())
