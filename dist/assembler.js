@@ -181,7 +181,7 @@ function assemble(asm_) {
         .filter(function (x) { return x.trim(); })
         .map(function (x) { return x.trim().replace(/\s+/g, ' ').replace(/,\s*/, ', ').toLowerCase(); });
     var dataSegStartLine = asm.findIndex(function (v) { return v.match(/\.data\s+(.+)/); });
-    var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text\s+(.+)/); });
+    var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text\s*/); });
     utils_1.assert(dataSegStartLine !== -1, '未找到数据段开始。');
     utils_1.assert(textSegStartLine !== -1, '未找到代码段开始。');
     utils_1.assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后。');
