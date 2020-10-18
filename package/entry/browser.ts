@@ -2,7 +2,7 @@
 import { Ace } from '../typing/ace'
 import { assemble } from '../assembler'
 
-const lastModifiedInfo = `最后更新于2020-10-07，暂不支持数据段导出。`
+const lastModifiedInfo = ``
 
 // @ts-ignore
 const editor = window.editor as Ace.Editor
@@ -45,7 +45,10 @@ function assembleBrowser() {
 
 window.addEventListener('load', () => {
   $<HTMLButtonElement>('#asm-assemble').onclick = assembleBrowser
-  $<HTMLButtonElement>('#asm-download').onclick = () => {
+  $<HTMLButtonElement>('#asm-download-coe').onclick = () => {
+    alert('该功能暂未支持。')
+  }
+  $<HTMLButtonElement>('#asm-download-txt').onclick = () => {
     alert('该功能暂未支持。')
   }
   $<HTMLSpanElement>('#asm-lastModified').innerHTML = lastModifiedInfo

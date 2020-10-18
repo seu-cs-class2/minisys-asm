@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var assembler_1 = require("../assembler");
-var lastModifiedInfo = "\u6700\u540E\u66F4\u65B0\u4E8E2020-10-07\uFF0C\u6682\u4E0D\u652F\u6301\u6570\u636E\u6BB5\u5BFC\u51FA\u3002";
+var lastModifiedInfo = "";
 // @ts-ignore
 var editor = window.editor;
 function $(selector) {
@@ -41,7 +41,10 @@ function assembleBrowser() {
 }
 window.addEventListener('load', function () {
     $('#asm-assemble').onclick = assembleBrowser;
-    $('#asm-download').onclick = function () {
+    $('#asm-download-coe').onclick = function () {
+        alert('该功能暂未支持。');
+    };
+    $('#asm-download-txt').onclick = function () {
         alert('该功能暂未支持。');
     };
     $('#asm-lastModified').innerHTML = lastModifiedInfo;

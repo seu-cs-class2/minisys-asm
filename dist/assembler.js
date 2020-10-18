@@ -11,7 +11,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseOneLine = exports.assemble = void 0;
+exports.parseOneLine = exports.assemble = exports.TextSeg = exports.DataSeg = void 0;
 var instruction_1 = require("./instruction");
 var register_1 = require("./register");
 var utils_1 = require("./utils");
@@ -47,6 +47,7 @@ var DataSeg = /** @class */ (function () {
     };
     return DataSeg;
 }());
+exports.DataSeg = DataSeg;
 var TextSeg = /** @class */ (function () {
     function TextSeg(startAddr, ins, labels) {
         this._startAddr = startAddr;
@@ -83,6 +84,7 @@ var TextSeg = /** @class */ (function () {
     };
     return TextSeg;
 }());
+exports.TextSeg = TextSeg;
 /**
  * 解析数据段
  * @param asm 从.data开始，到.text的前一行
@@ -157,6 +159,7 @@ function parseTextSeg(asm_) {
         if (/(.+):\s+(.+)/.test(v)) {
             utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label: " + RegExp.$1);
             // FIXME: 地址4字节对齐？
+            // FIXME: 地址计算不正确
             labels.push({ name: RegExp.$1, lineno: i, addr: utils_1.getOffsetAddr(startAddr, utils_1.getOffset({ instruction: i - 1 })) });
             return RegExp.$2;
         }

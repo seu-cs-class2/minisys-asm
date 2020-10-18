@@ -93,7 +93,7 @@ export class Instruction {
   }
 }
 
-// MIPS32指令集
+// Minisys指令集
 export const MinisysInstructions: Instruction[] = (function () {
   const _MinisysInstructions: Instruction[] = []
 

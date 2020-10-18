@@ -75,7 +75,7 @@ var Instruction = /** @class */ (function () {
     return Instruction;
 }());
 exports.Instruction = Instruction;
-// MIPS32指令集
+// Minisys指令集
 exports.MinisysInstructions = (function () {
     var _MinisysInstructions = [];
     // 新增指令
