@@ -133,8 +133,8 @@ function parseDataSeg(asm: string[]) {
   // 解析初始化值
   const parseInitValue = (init: string) => init.split(/\s*,/).map(v => v.trim())
 
-  const startAddr = asm[0].split(/\s+/)[1]
-  assert(asm[0].split(/\s+/).length === 2, '数据段首声明非法。')
+  const startAddr = asm[0].split(/\s+/)[1] || "0"
+  assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。')
 
   const VarStartPattern = /(.+):\s+\.(word|byte|half|ascii|space)\s+(.+)/
   const VarContdPattern = /\.(word|byte|half|ascii|space)\s+(.+)/
@@ -192,13 +192,14 @@ function parseDataSeg(asm: string[]) {
  */
 function parseTextSeg(asm_: string[]) {
   let asm = Array.from(asm_)
-  const startAddr = asm[0].split(/\s+/)[1]
+  const startAddr = asm[0].split(/\s+/)[1] || "0"
+  assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。')
 
   // 先提取掉所有的label
   let labels: TextSegLabel[] = []
   asm = asm.map((v, i) => {
     if (i === 0) return v
-    if (/(.+):\s+(.+)/.test(v)) {
+    if (/(.+):\s*(.+)/.test(v)) {
       assert(
         labels.every(label => label.name !== RegExp.$1),
         `存在重复的label: ${RegExp.$1}`
@@ -227,12 +228,14 @@ export function assemble(asm_: string) {
   // 格式化之。去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格
   const asm = asm_
     .replace(/\r\n/g, '\n')
+    .replace(/#(.*)\n/g, '\n')
+    .replace(/:\s*\n/g, ': ')
     .split('\n')
     .filter(x => x.trim())
     .map(x => x.trim().replace(/\s+/g, ' ').replace(/,\s*/, ', ').toLowerCase())
 
-  const dataSegStartLine = asm.findIndex(v => v.match(/\.data\s+(.+)/))
-  const textSegStartLine = asm.findIndex(v => v.match(/\.text\s+(.+)/))
+  const dataSegStartLine = asm.findIndex(v => v.match(/\.data/))
+  const textSegStartLine = asm.findIndex(v => v.match(/\.text/))
   assert(dataSegStartLine !== -1, '未找到数据段开始。')
   assert(textSegStartLine !== -1, '未找到代码段开始。')
   assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后。')

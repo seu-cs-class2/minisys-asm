@@ -78,9 +78,9 @@ export function getOffset(holder: {
   space?: number
   instruction?: number
 }) {
-  const WORD_LEN = 32
+  const WORD_LEN = 4
   const HALF_LEN = WORD_LEN / 2
-  const BYTE_LEN = 8
+  const BYTE_LEN = 1
   const INS_LEN = WORD_LEN
   return (
     (holder.byte || 0) * BYTE_LEN +
