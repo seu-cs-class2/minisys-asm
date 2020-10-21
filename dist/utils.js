@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOffsetAddr = exports.getOffset = exports.serialString = exports.hexToBin = exports.hexToDec = exports.decToHex = exports.binToHex = exports.decToBin = exports.assert = void 0;
+exports.getOffsetAddr = exports.getOffset = exports.serialString = exports.hexToBin = exports.hexToDec = exports.decToHex = exports.binToHex = exports.decToBin = exports.literalToBin = exports.assert = void 0;
 /**
  * Ensure `ensure`, else throw `Error(hint)`.
  */
@@ -10,6 +10,21 @@ function assert(ensure, hint) {
     }
 }
 exports.assert = assert;
+/**
+ * 把字面量数字转换为二进制
+ * @example 10
+ * @example 0xabcd
+ */
+function literalToBin(literal, len, pad) {
+    if (pad === void 0) { pad = '0'; }
+    if (literal.startsWith('0x')) {
+        return hexToBin(literal).padStart(len, pad);
+    }
+    else {
+        return decToBin(parseInt(literal), len, pad);
+    }
+}
+exports.literalToBin = literalToBin;
 /**
  * 将十进制数转为二进制，用pad补齐到len位
  */

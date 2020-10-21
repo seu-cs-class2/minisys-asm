@@ -13,7 +13,6 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseOneLine = exports.assemble = exports.TextSeg = exports.DataSeg = void 0;
 var instruction_1 = require("./instruction");
-var register_1 = require("./register");
 var utils_1 = require("./utils");
 var DataSeg = /** @class */ (function () {
     function DataSeg(startAddr, vars) {
@@ -157,7 +156,7 @@ function parseTextSeg(asm_) {
     asm = asm.map(function (v, i) {
         if (i === 0)
             return v;
-        if (/(.+):\s*(.+)/.test(v)) {
+        if (/(\w+):\s*(.+)/.test(v)) {
             utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label: " + RegExp.$1);
             // FIXME: 地址4字节对齐？
             // FIXME: 地址计算不正确
@@ -168,7 +167,7 @@ function parseTextSeg(asm_) {
     });
     var ins = [];
     asm.forEach(function (v, i) {
-        i !== 0 && ins.push(parseOneLine(v, labels, i));
+        i !== 0 && ins.push(parseOneLine(v, i));
     });
     return new TextSeg(startAddr, ins, labels);
 }
@@ -201,93 +200,23 @@ function assemble(asm_) {
 }
 exports.assemble = assemble;
 /**
- * 把字面量数字转换为二进制
- * @example 10
- * @example 0xabcd
- */
-function literalToBin(literal, len, pad) {
-    if (pad === void 0) { pad = '0'; }
-    if (literal.startsWith('0x')) {
-        return utils_1.hexToBin(literal).padStart(len, pad);
-    }
-    else {
-        return utils_1.decToBin(parseInt(literal), len, pad);
-    }
-}
-/**
  * 解析单行汇编到Instruction对象
  */
-function parseOneLine(asm, labels, lineno) {
-    var asmSplit = asm.trim().replace(/,/g, ' ').split(/\s+/);
-    utils_1.assert(asmSplit.every(function (v) { return v.length; }), "\u5B58\u5728\u7A7A\u53C2\u6570\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
+function parseOneLine(asm, lineno) {
     // 处理助记符
-    var symbol = asmSplit[0];
+    utils_1.assert(/^\s*(\w+)\s+(.*)/.test(asm), "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
+    var symbol = RegExp.$1;
+    asm = RegExp.$2.replace(/\s+/g, '');
     var instructionIndex = instruction_1.MinisysInstructions.findIndex(function (x) { return x.symbol == symbol; });
     utils_1.assert(instructionIndex !== -1, "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol + "\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     var res = instruction_1.Instruction.newInstance(instruction_1.MinisysInstructions[instructionIndex]);
-    // 填充参数
-    var params = asmSplit.slice(1);
-    params = params.map(function (v) {
-        // 是label
-        if (labels.some(function (x) { return x.name === v; })) {
-            return String(labels.find(function (x) { return x.name === v; }).addr);
-        }
-        if (v.match(/^[A-Za-z][A-Za-z0-9]*$/)) {
-            utils_1.assert(false, "\u6CA1\u9053\u7406\u7684\u53C2\u6570: " + v + "\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
-        }
-        return v;
-    });
-    // 处理比较特别的load/store指令
-    var LoadStoreIns = ['lb', 'lbu', 'lh', 'lhu', 'sb', 'sh', 'lw', 'sw'];
-    if (LoadStoreIns.includes(symbol)) {
-        var tmp = params.pop();
-        // **example**: lb $1, 10($2)
-        if (new RegExp(/(.+)\((.+)\)/).test(tmp)) {
-            params.push(RegExp.$2, RegExp.$1);
-        }
-        else {
-            throw new Error("\u6307\u4EE4\u53C2\u6570\u4E0E\u5E94\u6709\u7684\u53C2\u6570\u4E0D\u5339\u914D\uFF1A" + symbol);
-        }
-    }
-    // 普通情况
-    utils_1.assert(res.components.filter(function (v) { return v.type !== 'fixed'; }).length === params.length, "\u6307\u4EE4\u53C2\u6570\u4E0E\u5E94\u6709\u7684\u53C2\u6570\u4E0D\u5339\u914D\uFF1A" + symbol);
-    var i = 0;
+    utils_1.assert(res.insPattern.test(asm), "\u7B2C " + lineno + " \u884C\u6307\u4EE4\u53C2\u6570\u4E0D\u5339\u914D\uFF1A" + asm);
     res.components.forEach(function (component) {
         var arg;
-        switch (component.type) {
-            case 'fixed':
-                return;
-            case 'reg':
-                arg = register_1.regToBin(params[i]);
-                break;
-            case 'immed':
-                arg = literalToBin(params[i], 16);
-                break;
-            case 'offset':
-                // @ts-ignore
-                if (LoadStoreIns.includes(symbol) && isNaN(params[i])) {
-                    // TODO:
-                    throw new Error('暂不支持带变量名的 load/store 指令。');
-                }
-                arg = literalToBin(params[i], 16);
-                break;
-            case 'shamt':
-                arg = literalToBin(params[i], 5);
-                break;
-            case 'addr':
-                arg = literalToBin(params[i], 26);
-                break;
-            case 'code':
-                arg = literalToBin(params[i], 20);
-                break;
-            case 'c0sel':
-                arg = literalToBin(params[i], 6);
-                break;
-            default:
-                throw new Error('无效的指令组分类型。');
+        if (!component.val.trim()) {
+            arg = component.toBin();
+            res.setComponent(component.desc, arg);
         }
-        res.setComponent(component.desc, arg);
-        i++;
     });
     return res;
 }

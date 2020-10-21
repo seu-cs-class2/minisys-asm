@@ -36,6 +36,7 @@ function assembleBrowser() {
     }
     catch (ex) {
         setStatus('fail', ex);
+        console.log(ex);
         resultDOM.value = '';
     }
 }

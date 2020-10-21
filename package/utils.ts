@@ -8,6 +8,19 @@ export function assert(ensure: unknown, hint?: string) {
 }
 
 /**
+ * 把字面量数字转换为二进制
+ * @example 10
+ * @example 0xabcd
+ */
+export function literalToBin(literal: string, len: number, pad: '0' | '1' = '0') {
+  if (literal.startsWith('0x')) {
+    return hexToBin(literal).padStart(len, pad)
+  } else {
+    return decToBin(parseInt(literal), len, pad)
+  }
+}
+
+/**
  * 将十进制数转为二进制，用pad补齐到len位
  */
 export function decToBin(dec: number, len: number, pad: '0' | '1' = '0') {
