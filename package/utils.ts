@@ -12,6 +12,7 @@ export function assert(ensure: unknown, hint?: string) {
  * @example 10
  * @example 0xabcd
  */
+// FIXME: 符号扩展不正确
 export function literalToBin(literal: string, len: number, pad: '0' | '1' = '0') {
   if (literal.startsWith('0x')) {
     return hexToBin(literal).padStart(len, pad)

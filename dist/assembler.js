@@ -215,6 +215,7 @@ function parseOneLine(asm, lineno) {
         var arg;
         if (!component.val.trim()) {
             arg = component.toBin();
+            // TODO: 目前暂未支持label和变量名的转换
             res.setComponent(component.desc, arg);
         }
     });

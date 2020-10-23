@@ -204,7 +204,6 @@ function parseTextSeg(asm_: string[]) {
         `存在重复的label: ${RegExp.$1}`
       )
       // FIXME: 地址4字节对齐？
-      // FIXME: 地址计算不正确
       labels.push({ name: RegExp.$1, lineno: i, addr: getOffsetAddr(startAddr, getOffset({ instruction: i - 1 })) })
       return RegExp.$2
     }

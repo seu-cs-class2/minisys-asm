@@ -33,7 +33,6 @@ function assembleBrowser() {
   const asmCode = editor.getValue()
   try {
     const result = assemble(asmCode)
-    console.log(result)
     const binary = result.textSeg.toBinary()
     resultDOM.value = binary
     setStatus('success')
