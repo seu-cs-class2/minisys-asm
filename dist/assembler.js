@@ -159,7 +159,6 @@ function parseTextSeg(asm_) {
         if (/(\w+):\s*(.+)/.test(v)) {
             utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label: " + RegExp.$1);
             // FIXME: 地址4字节对齐？
-            // FIXME: 地址计算不正确
             labels.push({ name: RegExp.$1, lineno: i, addr: utils_1.getOffsetAddr(startAddr, utils_1.getOffset({ instruction: i - 1 })) });
             return RegExp.$2;
         }

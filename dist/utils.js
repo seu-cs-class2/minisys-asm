@@ -15,6 +15,7 @@ exports.assert = assert;
  * @example 10
  * @example 0xabcd
  */
+// FIXME: 符号扩展不正确
 function literalToBin(literal, len, pad) {
     if (pad === void 0) { pad = '0'; }
     if (literal.startsWith('0x')) {

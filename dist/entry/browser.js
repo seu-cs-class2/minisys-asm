@@ -29,7 +29,6 @@ function assembleBrowser() {
     var asmCode = editor.getValue();
     try {
         var result = assembler_1.assemble(asmCode);
-        console.log(result);
         var binary = result.textSeg.toBinary();
         resultDOM.value = binary;
         setStatus('success');

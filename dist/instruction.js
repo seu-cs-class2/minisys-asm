@@ -105,16 +105,16 @@ exports.MinisysInstructions = (function () {
    * 获取指令正则模式
    * @param params 汇编指令的参数个数
    */
-    function patternWithParams(num) {
+    function paramPattern(num) {
         if (num < 1) {
             return /^$/;
         }
         else {
-            return new RegExp('([\\w$]+),'.repeat(num - 1) + '([\\w$]+)$');
+            return new RegExp('^' + '([\\w$]+),'.repeat(num - 1) + '([\\w$]+)$');
         }
     }
     // =================== R型指令 ===================
-    newInstruction('add', '按字加法', '(rd)←(rs)+(rt)', patternWithParams(3), [
+    newInstruction('add', '按字加法', '(rd)←(rs)+(rt)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -122,7 +122,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '100000'],
     ]);
-    newInstruction('addu', '无符号加', '(rd)←(rs)+(rt)', patternWithParams(3), [
+    newInstruction('addu', '无符号加', '(rd)←(rs)+(rt)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -130,7 +130,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '100001'],
     ]);
-    newInstruction('sub', '按字减法', '(rd)←(rs)-(rt)', patternWithParams(3), [
+    newInstruction('sub', '按字减法', '(rd)←(rs)-(rt)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -138,7 +138,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '100010'],
     ]);
-    newInstruction('subu', '无符号减', '(rd)←(rs)-(rt)', patternWithParams(3), [
+    newInstruction('subu', '无符号减', '(rd)←(rs)-(rt)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -146,7 +146,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '100011'],
     ]);
-    newInstruction('and', '按位与', '(rd)←(rs)&(rt)', patternWithParams(3), [
+    newInstruction('and', '按位与', '(rd)←(rs)&(rt)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -154,62 +154,62 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '100100'],
     ]);
-    newInstruction('mult', '按字乘法', '(HI,LO)←(rs)*(rt)', patternWithParams(2), [
+    newInstruction('mult', '按字乘法', '(HI,LO)←(rs)*(rt)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [15, 6, 'rd+shamt', function () { }, 'fixed', '0000000000'],
         [5, 0, 'func', function () { }, 'fixed', '011000'],
     ]);
-    newInstruction('multu', '无符号乘', '(HI,LO)←(rs)*(rt)', patternWithParams(2), [
+    newInstruction('multu', '无符号乘', '(HI,LO)←(rs)*(rt)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [15, 6, 'rd+shamt', function () { }, 'fixed', '0000000000'],
         [5, 0, 'func', function () { }, 'fixed', '011001'],
     ]);
-    newInstruction('div', '除法', '(HI)←(rs)%(rt), (LO)←(rs)/(rt)', patternWithParams(2), [
+    newInstruction('div', '除法', '(HI)←(rs)%(rt), (LO)←(rs)/(rt)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [15, 6, 'rd+shamt', function () { }, 'fixed', '0000000000'],
         [5, 0, 'func', function () { }, 'fixed', '011010'],
     ]);
-    newInstruction('divu', '无符号除', '(HI)←(rs)%(rt), (LO)←(rs)/(rt)', patternWithParams(2), [
+    newInstruction('divu', '无符号除', '(HI)←(rs)%(rt), (LO)←(rs)/(rt)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [15, 6, 'rd+shamt', function () { }, 'fixed', '0000000000'],
         [5, 0, 'func', function () { }, 'fixed', '011011'],
     ]);
-    newInstruction('mfhi', '取HI', '(rd)←(HI)', patternWithParams(1), [
+    newInstruction('mfhi', '取HI', '(rd)←(HI)', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 16, 'rs+rt', function () { }, 'fixed', '0000000000'],
         [15, 11, 'rd', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '010000'],
     ]);
-    newInstruction('mflo', '取LO', '(rd)←(LO)', patternWithParams(1), [
+    newInstruction('mflo', '取LO', '(rd)←(LO)', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 16, 'rs+rt', function () { }, 'fixed', '0000000000'],
         [15, 11, 'rd', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '010010'],
     ]);
-    newInstruction('mthi', '存HI', '(HI)←(rs)', patternWithParams(1), [
+    newInstruction('mthi', '存HI', '(HI)←(rs)', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 6, 'rt+rd+shamt', function () { }, 'fixed', '000000000000000'],
         [5, 0, 'func', function () { }, 'fixed', '010001'],
     ]);
-    newInstruction('mtlo', '存LO', '(LO)←(rs)', patternWithParams(1), [
+    newInstruction('mtlo', '存LO', '(LO)←(rs)', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 6, 'rt+rd+shamt', function () { }, 'fixed', '000000000000000'],
         [5, 0, 'func', function () { }, 'fixed', '010011'],
     ]);
     // 注意MFC0和MTC0的特殊性
-    newInstruction('mfc0', '取C0', '(rt)=由(rd)和sel确定的C0寄存器的值', patternWithParams(3), [
+    newInstruction('mfc0', '取C0', '(rt)=由(rd)和sel确定的C0寄存器的值', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '010000'],
         [25, 21, 'rs', function () { }, 'fixed', '00000'],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
@@ -217,7 +217,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { return utils_1.literalToBin(RegExp.$3, 6); }, 'c0sel', ''],
     ]);
-    newInstruction('mtc0', '存C0', '由(rd)和sel确定的C0寄存器的值=(rt)', patternWithParams(3), [
+    newInstruction('mtc0', '存C0', '由(rd)和sel确定的C0寄存器的值=(rt)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '010000'],
         [25, 21, 'rs', function () { }, 'fixed', '00100'],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
@@ -225,7 +225,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { return utils_1.literalToBin(RegExp.$3, 6); }, 'c0sel', ''],
     ]);
-    newInstruction('or', '按位或', '(rd)←(rs)|(rt)', patternWithParams(3), [
+    newInstruction('or', '按位或', '(rd)←(rs)|(rt)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -233,7 +233,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '100101'],
     ]);
-    newInstruction('xor', '按位异或', '(rd)←(rs)^(rt)', patternWithParams(3), [
+    newInstruction('xor', '按位异或', '(rd)←(rs)^(rt)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -241,7 +241,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '100110'],
     ]);
-    newInstruction('nor', '按位或非', '(rd)←~((rs)|(rt))', patternWithParams(3), [
+    newInstruction('nor', '按位或非', '(rd)←~((rs)|(rt))', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -249,7 +249,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '100111'],
     ]);
-    newInstruction('slt', '有符号比较', 'if (rs<rt) rd=1 else rd=0', patternWithParams(3), [
+    newInstruction('slt', '有符号比较', 'if (rs<rt) rd=1 else rd=0', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -257,7 +257,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '101010'],
     ]);
-    newInstruction('sltu', '无符号比较', 'if (rs<rt) rd=1 else rd=0', patternWithParams(3), [
+    newInstruction('sltu', '无符号比较', 'if (rs<rt) rd=1 else rd=0', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
@@ -265,7 +265,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '101011'],
     ]);
-    newInstruction('sll', '逻辑左移', '(rd)←(rt)<<shamt', patternWithParams(3), [
+    newInstruction('sll', '逻辑左移', '(rd)←(rt)<<shamt', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { }, 'fixed', '00000'],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
@@ -273,7 +273,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { return utils_1.literalToBin(RegExp.$3, 5); }, 'shamt', ''],
         [5, 0, 'func', function () { }, 'fixed', '000000'],
     ]);
-    newInstruction('srl', '逻辑右移', '(rd)←(rt)>>_L shamt', patternWithParams(3), [
+    newInstruction('srl', '逻辑右移', '(rd)←(rt)>>_L shamt', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { }, 'fixed', '00000'],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
@@ -281,7 +281,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { return utils_1.literalToBin(RegExp.$3, 5); }, 'shamt', ''],
         [5, 0, 'func', function () { }, 'fixed', '000010'],
     ]);
-    newInstruction('sra', '算术右移', '(rd)←(rt)>>_A shamt', patternWithParams(3), [
+    newInstruction('sra', '算术右移', '(rd)←(rt)>>_A shamt', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { }, 'fixed', '00000'],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
@@ -289,7 +289,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { return utils_1.literalToBin(RegExp.$3, 5); }, 'shamt', ''],
         [5, 0, 'func', function () { }, 'fixed', '000011'],
     ]);
-    newInstruction('sllv', '逻辑左移V', '(rd)←(rt)<<(rs)', patternWithParams(3), [
+    newInstruction('sllv', '逻辑左移V', '(rd)←(rt)<<(rs)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
@@ -297,7 +297,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '000100'],
     ]);
-    newInstruction('srlv', '逻辑右移V', '(rd)←(rt)>>_L (rs)', patternWithParams(3), [
+    newInstruction('srlv', '逻辑右移V', '(rd)←(rt)>>_L (rs)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
@@ -305,7 +305,7 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '000110'],
     ]);
-    newInstruction('srav', '算术右移V', '(rd)←(rt)>>_L (rs)', patternWithParams(3), [
+    newInstruction('srav', '算术右移V', '(rd)←(rt)>>_L (rs)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
@@ -313,13 +313,13 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '000111'],
     ]);
-    newInstruction('jr', '无条件跳转（寄存器）', '(PC)←(rs)', patternWithParams(1), [
+    newInstruction('jr', '无条件跳转（寄存器）', '(PC)←(rs)', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 6, 'rt+rd+shamt', function () { }, 'fixed', '000000000000000'],
         [5, 0, 'func', function () { }, 'fixed', '001000'],
     ]);
-    newInstruction('jalr', '暂存下条后跳转（寄存器）', '(rd)=(PC)+4,(PC)←(rs)', patternWithParams(2), [
+    newInstruction('jalr', '暂存下条后跳转（寄存器）', '(rd)=(PC)+4,(PC)←(rs)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '00000'],
@@ -327,53 +327,53 @@ exports.MinisysInstructions = (function () {
         [10, 6, 'shamt', function () { }, 'fixed', '00000'],
         [5, 0, 'func', function () { }, 'fixed', '001001'],
     ]);
-    newInstruction('break', '断点异常', '断点异常', patternWithParams(1), [
+    newInstruction('break', '断点异常', '断点异常', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 6, 'code', function () { return utils_1.literalToBin(RegExp.$1, 20); }, 'code', ''],
         [5, 0, 'func', function () { }, 'fixed', '001101'],
     ]);
-    newInstruction('syscall', '系统调用', '系统调用', patternWithParams(1), [
+    newInstruction('syscall', '系统调用', '系统调用', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000000'],
         [25, 6, 'code', function () { return utils_1.literalToBin(RegExp.$1, 20); }, 'code', ''],
         [5, 0, 'func', function () { }, 'fixed', '001100'],
     ]);
-    newInstruction('eret', '从中断或者异常中返回', '从中断或者异常中返回', patternWithParams(0), [
+    newInstruction('eret', '从中断或者异常中返回', '从中断或者异常中返回', paramPattern(0), [
         [31, 26, 'op', function () { }, 'fixed', '010000'],
         [25, 6, 'rs+rt+rd+shamt', function () { }, 'fixed', '10000000000000000000'],
         [5, 0, 'func', function () { }, 'fixed', '011000'],
     ]);
     // =================== I型指令 ===================
-    newInstruction('addi', '加立即数', '(rt)←(rs)+(sign-extend)immediate', patternWithParams(3), [
+    newInstruction('addi', '加立即数', '(rt)←(rs)+(sign-extend)immediate', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '001000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
     ]);
-    newInstruction('addiu', '无符号加立即数', '(rt)←(rs)+(sign-extend)immediate', patternWithParams(3), [
+    newInstruction('addiu', '无符号加立即数', '(rt)←(rs)+(sign-extend)immediate', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '001001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
     ]);
-    newInstruction('andi', '按位与立即数', '(rt)←(rs)&(zero-extend)immediate', patternWithParams(3), [
+    newInstruction('andi', '按位与立即数', '(rt)←(rs)&(zero-extend)immediate', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '001100'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
     ]);
-    newInstruction('ori', '按位或立即数', '(rt)←(rs)|(zero-extend)immediate', patternWithParams(3), [
+    newInstruction('ori', '按位或立即数', '(rt)←(rs)|(zero-extend)immediate', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '001101'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
     ]);
-    newInstruction('xori', '按位异或立即数', '(rt)←(rs)^(zero-extend)immediate', patternWithParams(3), [
+    newInstruction('xori', '按位异或立即数', '(rt)←(rs)^(zero-extend)immediate', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '001110'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
     ]);
-    newInstruction('lui', '取立即数高16位', '(rt)←immediate<<16 & 0FFFF0000H', patternWithParams(2), [
+    newInstruction('lui', '取立即数高16位', '(rt)←immediate<<16 & 0FFFF0000H', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '001111'],
         [25, 21, 'rs', function () { }, 'fixed', '00000'],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
@@ -427,76 +427,76 @@ exports.MinisysInstructions = (function () {
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 16); }, 'offset', ''],
     ]);
-    newInstruction('beq', '相等分支', 'if ((rt)=(rs)) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', patternWithParams(3), [
+    newInstruction('beq', '相等分支', 'if ((rt)=(rs)) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000100'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$3, 18).slice(0, 16); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$3, 18).slice(-18, -2); }, 'offset', ''],
     ]);
-    newInstruction('bne', '不等分支', 'if ((rt)≠(rs)) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', patternWithParams(3), [
+    newInstruction('bne', '不等分支', 'if ((rt)≠(rs)) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000101'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$3, 18).slice(0, 16); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$3, 18).slice(-18, -2); }, 'offset', ''],
     ]);
-    newInstruction('bgez', '大于等于0分支', 'if ((rs)≥0) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', patternWithParams(2), [
+    newInstruction('bgez', '大于等于0分支', 'if ((rs)≥0) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '00001'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(0, 16); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'offset', ''],
     ]);
-    newInstruction('bgtz', '大于0分支', 'if ((rs)＞0) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', patternWithParams(2), [
+    newInstruction('bgtz', '大于0分支', 'if ((rs)＞0) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000111'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '00000'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(0, 16); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'offset', ''],
     ]);
-    newInstruction('blez', '小于等于0分支', 'if ((rs)≤0) then (PC)←(PC)+4+((Sign-Extend) offset<<2)', patternWithParams(2), [
+    newInstruction('blez', '小于等于0分支', 'if ((rs)≤0) then (PC)←(PC)+4+((Sign-Extend) offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000110'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '00000'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(0, 16); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'offset', ''],
     ]);
-    newInstruction('bltz', '小于0分支', 'if ((rs)＜0) then (PC)←(PC)+4+((Sign-Extend) offset<<2)', patternWithParams(2), [
+    newInstruction('bltz', '小于0分支', 'if ((rs)＜0) then (PC)←(PC)+4+((Sign-Extend) offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000111'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '00000'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(0, 16); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'offset', ''],
     ]);
-    newInstruction('bgezal', '大于等于0分支（Link）', 'if ((rs)≥0) then ($31)←(PC)+4,(PC)←(PC)+4+((Sign-Extend) offset<<2)', patternWithParams(2), [
+    newInstruction('bgezal', '大于等于0分支（Link）', 'if ((rs)≥0) then ($31)←(PC)+4,(PC)←(PC)+4+((Sign-Extend) offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '10001'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(0, 16); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'offset', ''],
     ]);
-    newInstruction('bltzal', '小于0分支（Link）', 'if ((rs)＜0) then ($31)←(PC)+4,(PC)←(PC)+4+((Sign-Extend) offset<<2)', patternWithParams(2), [
+    newInstruction('bltzal', '小于0分支（Link）', 'if ((rs)＜0) then ($31)←(PC)+4,(PC)←(PC)+4+((Sign-Extend) offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '10000'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(0, 16); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'offset', ''],
     ]);
-    newInstruction('slti', '小于立即数时Set', 'if ((rs)<(Sign-Extend)immediate) then (rt)←1; else (rt)←0', patternWithParams(3), [
+    newInstruction('slti', '小于立即数时Set', 'if ((rs)<(Sign-Extend)immediate) then (rt)←1; else (rt)←0', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '001010'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
     ]);
-    newInstruction('sltiu', '小于立即数时Set（无符号）', 'if ((rs)<(Zero-Extend)immediate) then (rt)←1; else (rt)←0', patternWithParams(3), [
+    newInstruction('sltiu', '小于立即数时Set（无符号）', 'if ((rs)<(Zero-Extend)immediate) then (rt)←1; else (rt)←0', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '001011'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
     ]);
     // =================== J型指令 ===================
-    newInstruction('j', '无条件跳转', '(PC)←((Zero-Extend)address<<2)', patternWithParams(1), [
+    newInstruction('j', '无条件跳转', '(PC)←((Zero-Extend)address<<2)', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000010'],
-        [25, 0, 'target', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(0, 16); }, 'addr', ''],
+        [25, 0, 'target', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'addr', ''],
     ]);
-    newInstruction('jal', '暂存下条后跳转（立即数）', '($31)←(PC)+4; (PC)←((Zero-Extend)address<<2),', patternWithParams(1), [
+    newInstruction('jal', '暂存下条后跳转（立即数）', '($31)←(PC)+4; (PC)←((Zero-Extend)address<<2),', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000011'],
-        [25, 0, 'target', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(0, 16); }, 'addr', ''],
+        [25, 0, 'target', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'addr', ''],
     ]);
     // =================== NOP指令 ===================
-    newInstruction('nop', '空转指令', 'do nothing', patternWithParams(0), [[31, 0, 'NOP', function () { }, 'fixed', '0'.repeat(32)]]);
+    newInstruction('nop', '空转指令', 'do nothing', paramPattern(0), [[31, 0, 'NOP', function () { }, 'fixed', '0'.repeat(32)]]);
     return _MinisysInstructions;
 })();
