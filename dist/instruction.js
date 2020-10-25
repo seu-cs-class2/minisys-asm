@@ -14,7 +14,14 @@ var Instruction = /** @class */ (function () {
         this._desc = desc;
         this._pseudo = pseudo;
         this._insPattern = insPattern;
-        this._components = components.concat();
+        this._components = components.concat().map(function (x) { return ({
+            lBit: x.lBit,
+            rBit: x.rBit,
+            desc: x.desc,
+            toBin: x.toBin,
+            type: x.type,
+            val: x.val,
+        }); });
     }
     Instruction.newInstance = function (baseOn) {
         return new Instruction(baseOn.symbol, baseOn.desc, baseOn.pseudo, baseOn.insPattern, baseOn.components);

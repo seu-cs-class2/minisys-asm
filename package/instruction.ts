@@ -26,6 +26,7 @@ export interface InstructionComponent {
   type: InstructionComponentType
   // 参数值，为空串表示可变，否则表示固定或已填写
   val: string
+
 }
 
 // 指令类
@@ -85,7 +86,14 @@ export class Instruction {
     this._desc = desc
     this._pseudo = pseudo
     this._insPattern = insPattern
-    this._components = components.concat()
+    this._components = components.concat().map(x => ({
+      lBit: x.lBit,
+      rBit: x.rBit,
+      desc: x.desc,
+      toBin: x.toBin,
+      type: x.type,
+      val: x.val,
+    })) as InstructionComponent[]
   }
 
   setComponent(desc: string, val: string) {
