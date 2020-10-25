@@ -4,8 +4,7 @@
  */
 
 import { Instruction, MinisysInstructions } from './instruction'
-import { regToBin } from './register'
-import { assert, decToBin, getOffset, getOffsetAddr, hexToBin } from './utils'
+import { assert, getOffset, getOffsetAddr, serialString } from './utils'
 
 type HexAddr = string
 type VarCompType = 'byte' | 'half' | 'word' | 'ascii' | 'space'
@@ -199,13 +198,12 @@ function parseTextSeg(asm_: string[]) {
   let labels: TextSegLabel[] = []
   asm = asm.map((v, i) => {
     if (i === 0) return v
-    if (/(.+):\s*(.+)/.test(v)) {
+    if (/(\w+):\s*(.+)/.test(v)) {
       assert(
         labels.every(label => label.name !== RegExp.$1),
         `存在重复的label: ${RegExp.$1}`
       )
       // FIXME: 地址4字节对齐？
-      // FIXME: 地址计算不正确
       labels.push({ name: RegExp.$1, lineno: i, addr: getOffsetAddr(startAddr, getOffset({ instruction: i - 1 })) })
       return RegExp.$2
     }
@@ -214,7 +212,7 @@ function parseTextSeg(asm_: string[]) {
 
   let ins: Instruction[] = []
   asm.forEach((v, i) => {
-    i !== 0 && ins.push(parseOneLine(v, labels, i))
+    i !== 0 && ins.push(parseOneLine(v, i))
   })
 
   return new TextSeg(startAddr, ins, labels)
@@ -252,101 +250,32 @@ export function assemble(asm_: string) {
 }
 
 /**
- * 把字面量数字转换为二进制
- * @example 10
- * @example 0xabcd
- */
-function literalToBin(literal: string, len: number, pad: '0' | '1' = '0') {
-  if (literal.startsWith('0x')) {
-    return hexToBin(literal).padStart(len, pad)
-  } else {
-    return decToBin(parseInt(literal), len, pad)
-  }
-}
-
-/**
  * 解析单行汇编到Instruction对象
  */
-export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number) {
-  const asmSplit = asm.trim().replace(/,/g, ' ').split(/\s+/)
-  assert(
-    asmSplit.every(v => v.length),
-    `存在空参数，在第 ${lineno} 行。`
-  )
-
+export function parseOneLine(asm: string, lineno: number) {
   // 处理助记符
-  const symbol = asmSplit[0]
+  assert(
+    /^\s*(\w+)\s+(.*)/.test(asm),
+    `没有找到指令助记符，在第 ${lineno} 行。`
+  )
+  const symbol = RegExp.$1
+  asm = serialString(RegExp.$2)
   const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
   assert(instructionIndex !== -1, `没有找到指令助记符：${symbol}，在第 ${lineno} 行。`)
 
   let res = Instruction.newInstance(MinisysInstructions[instructionIndex])
-  // 填充参数
-  let params = asmSplit.slice(1)
-  params = params.map(v => {
-    // 是label
-    if (labels.some(x => x.name === v)) {
-      return String(labels.find(x => x.name === v)!.addr)
-    }
-    if (v.match(/^[A-Za-z][A-Za-z0-9]*$/)) {
-      assert(false, `没道理的参数: ${v}，在第 ${lineno} 行。`)
-    }
-    return v
-  })
 
-  // 处理比较特别的load/store指令
-  const LoadStoreIns = ['lb', 'lbu', 'lh', 'lhu', 'sb', 'sh', 'lw', 'sw']
-  if (LoadStoreIns.includes(symbol)) {
-    let tmp = params.pop() as string
-    // **example**: lb $1, 10($2)
-    if (new RegExp(/(.+)\((.+)\)/).test(tmp)) {
-      params.push(RegExp.$2, RegExp.$1)
-    } else {
-      throw new Error(`指令参数与应有的参数不匹配：${symbol}`)
-    }
-  }
-  // 普通情况
   assert(
-    res.components.filter(v => v.type !== 'fixed').length === params.length,
-    `指令参数与应有的参数不匹配：${symbol}`
+    res.insPattern.test(asm),
+    `第 ${lineno} 行指令参数不匹配：${asm}`
   )
-  let i = 0
   res.components.forEach(component => {
     let arg
-    switch (component.type) {
-      case 'fixed':
-        return
-      case 'reg':
-        arg = regToBin(params[i])
-        break
-      case 'immed':
-        arg = literalToBin(params[i], 16)
-        break
-      case 'offset':
-        // @ts-ignore
-        if (LoadStoreIns.includes(symbol) && isNaN(params[i])) {
-          // TODO:
-          throw new Error('暂不支持带变量名的 load/store 指令。')
-        }
-        arg = literalToBin(params[i], 16)
-        break
-      case 'shamt':
-        arg = literalToBin(params[i], 5)
-        break
-      case 'addr':
-        arg = literalToBin(params[i], 26)
-        break
-      case 'code':
-        arg = literalToBin(params[i], 20)
-        break
-      case 'c0sel':
-        arg = literalToBin(params[i], 6)
-        break
-      default:
-        throw new Error('无效的指令组分类型。')
+    if (!component.val.trim()) {
+      arg = component.toBin()
+      // TODO: 目前暂未支持label和变量名的转换
+      res.setComponent(component.desc, arg)
     }
-
-    res.setComponent(component.desc, arg)
-    i++
   })
 
   return res
