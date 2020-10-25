@@ -12,20 +12,26 @@ export function assert(ensure: unknown, hint?: string) {
  * @example 10
  * @example 0xabcd
  */
-// FIXME: 符号扩展不正确
-export function literalToBin(literal: string, len: number, pad: '0' | '1' = '0') {
+export function literalToBin(literal: string, len: number, isSignExtend: boolean = false) {
   if (literal.startsWith('0x')) {
-    return hexToBin(literal).padStart(len, pad)
+    let num =  hexToBin(literal)
+    return num.padStart(len, isSignExtend ? num[0] : '0')
   } else {
-    return decToBin(parseInt(literal), len, pad)
+    return decToBin(parseInt(literal), len, isSignExtend)
   }
 }
 
 /**
  * 将十进制数转为二进制，用pad补齐到len位
  */
-export function decToBin(dec: number, len: number, pad: '0' | '1' = '0') {
-  return Number(dec).toString(2).padStart(len, pad)
+export function decToBin(dec: number, len: number, isSignExtend: boolean = false) {
+  let num: string = ''
+  if (dec < 0) {
+    num = '1' + (-dec-1).toString(2).split('').map(v => { return String.fromCharCode(v.charCodeAt(0)^1)}).join('')
+  } else {
+    num = '0' + dec.toString(2)
+  }
+  return num.padStart(len, isSignExtend ? num[0] : '0')
 }
 
 /**
@@ -48,7 +54,7 @@ export function binToHex(bin: string, zeroX = true) {
  * 将十进制数转为十六进制，十进制数会先被转换为4n位二进制
  */
 export function decToHex(dec: number, len: number, zeroX = true) {
-  return binToHex(decToBin(dec, len, '0'), zeroX)
+  return binToHex(decToBin(dec, len, false), zeroX)
 }
 
 /**
@@ -67,7 +73,7 @@ export function hexToBin(hex: string) {
   }
   const table = Array(16)
     .fill('')
-    .map((_, i) => decToBin(i, 4, '0'))
+    .map((_, i) => decToBin(i, 4, false))
   let res = ''
   hex.split('').forEach(v => {
     res += table['0123456789abcdef'.indexOf(v)]

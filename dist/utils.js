@@ -16,22 +16,30 @@ exports.assert = assert;
  * @example 0xabcd
  */
 // FIXME: 符号扩展不正确
-function literalToBin(literal, len, pad) {
-    if (pad === void 0) { pad = '0'; }
+function literalToBin(literal, len, isSignExtend) {
+    if (isSignExtend === void 0) { isSignExtend = false; }
     if (literal.startsWith('0x')) {
-        return hexToBin(literal).padStart(len, pad);
+        var num = hexToBin(literal);
+        return num.padStart(len, isSignExtend ? num[0] : '0');
     }
     else {
-        return decToBin(parseInt(literal), len, pad);
+        return decToBin(parseInt(literal), len, isSignExtend);
     }
 }
 exports.literalToBin = literalToBin;
 /**
  * 将十进制数转为二进制，用pad补齐到len位
  */
-function decToBin(dec, len, pad) {
-    if (pad === void 0) { pad = '0'; }
-    return Number(dec).toString(2).padStart(len, pad);
+function decToBin(dec, len, isSignExtend) {
+    if (isSignExtend === void 0) { isSignExtend = false; }
+    var num = '';
+    if (dec < 0) {
+        num = '1' + (-dec - 1).toString(2).split('').map(function (v) { return String.fromCharCode(v.charCodeAt(0) ^ 1); }).join('');
+    }
+    else {
+        num = '0' + dec.toString(2);
+    }
+    return num.padStart(len, isSignExtend ? num[0] : '0');
 }
 exports.decToBin = decToBin;
 /**
@@ -54,7 +62,7 @@ exports.binToHex = binToHex;
  */
 function decToHex(dec, len, zeroX) {
     if (zeroX === void 0) { zeroX = true; }
-    return binToHex(decToBin(dec, len, '0'), zeroX);
+    return binToHex(decToBin(dec, len, false), zeroX);
 }
 exports.decToHex = decToHex;
 /**
@@ -73,7 +81,7 @@ function hexToBin(hex) {
     }
     var table = Array(16)
         .fill('')
-        .map(function (_, i) { return decToBin(i, 4, '0'); });
+        .map(function (_, i) { return decToBin(i, 4, false); });
     var res = '';
     hex.split('').forEach(function (v) {
         res += table['0123456789abcdef'.indexOf(v)];

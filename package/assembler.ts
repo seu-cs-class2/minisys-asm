@@ -4,7 +4,7 @@
  */
 
 import { Instruction, MinisysInstructions } from './instruction'
-import { assert, getOffset, getOffsetAddr } from './utils'
+import { assert, getOffset, getOffsetAddr, serialString } from './utils'
 
 type HexAddr = string
 type VarCompType = 'byte' | 'half' | 'word' | 'ascii' | 'space'
@@ -259,7 +259,7 @@ export function parseOneLine(asm: string, lineno: number) {
     `没有找到指令助记符，在第 ${lineno} 行。`
   )
   const symbol = RegExp.$1
-  asm = RegExp.$2.replace(/\s+/g, '')
+  asm = serialString(RegExp.$2)
   const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
   assert(instructionIndex !== -1, `没有找到指令助记符：${symbol}，在第 ${lineno} 行。`)
 
