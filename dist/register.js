@@ -24,7 +24,7 @@ var registerNames = [
 function regToBin(reg) {
     reg = reg.replace('$', '').trim();
     var regNumber;
-    if (reg.match(/^\d+$/)) {
+    if (reg.split('').every(function (x) { return '0123456789'.includes(x); })) {
         regNumber = Number(reg);
     }
     else {

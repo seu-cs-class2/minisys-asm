@@ -24,7 +24,7 @@ const registerNames = [
 export function regToBin(reg: string) {
   reg = reg.replace('$', '').trim()
   let regNumber
-  if (reg.match(/^\d+$/)) {
+  if (reg.split('').every(x => { return '0123456789'.includes(x) })) {
     regNumber = Number(reg)
   } else {
     regNumber = registerNames.indexOf(reg)

@@ -273,7 +273,6 @@ export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number
     res.insPattern.test(asm),
     `第 ${lineno} 行指令参数不匹配：${asm}`
   )
-  console.log(asm)
   res.components.forEach(component => {
     if (!component.val.trim()) {
       let arg = component.toBin()

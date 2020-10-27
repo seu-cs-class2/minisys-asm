@@ -214,7 +214,6 @@ function parseOneLine(asm, labels, lineno) {
     utils_1.assert(instructionIndex !== -1, "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol + "\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     var res = instruction_1.Instruction.newInstance(instruction_1.MinisysInstructions[instructionIndex]);
     utils_1.assert(res.insPattern.test(asm), "\u7B2C " + lineno + " \u884C\u6307\u4EE4\u53C2\u6570\u4E0D\u5339\u914D\uFF1A" + asm);
-    console.log(asm);
     res.components.forEach(function (component) {
         if (!component.val.trim()) {
             var arg = component.toBin();

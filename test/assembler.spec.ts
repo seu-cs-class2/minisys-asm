@@ -9,12 +9,12 @@ describe('AsmParser.ts', () => {
 
     test('I型指令解析正确', () => {
       expect(parseOneLine('beq $1, $2, 40', [], 0).toBinary()).toBe(
-        serialString('000100 00001 00010 00000000 00101000')
+        serialString('000100 00010 00001 00000000 00001010')
       )
     })
 
     test('J型指令解析正确', () => {
-      expect(parseOneLine('j 0x2710', [], 0).toBinary()).toBe(serialString('000010 000000000 00010011100010000'))
+      expect(parseOneLine('j 0x2710', [], 0).toBinary()).toBe(serialString('000010 000000000 00000100111000100'))
     })
   })
 })
