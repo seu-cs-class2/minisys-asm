@@ -12,6 +12,9 @@ function assert(ensure, hint) {
 exports.assert = assert;
 /**
  * 把字面量数字转换为二进制
+ * @param literal 要转换的字面量数字
+ * @param len 转换后的最少位数
+ * @param isSignExtend 转换后位数不足时是否进行符号扩展，默认采用零扩展
  * @example 10
  * @example 0xabcd
  */

@@ -438,49 +438,49 @@ exports.MinisysInstructions = (function () {
         [31, 26, 'op', function () { }, 'fixed', '000100'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$3, 18, true).slice(-18, -2); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$3, 18, true).slice(0, -2); }, 'offset', ''],
     ]);
     newInstruction('bne', '不等分支', 'if ((rt)≠(rs)) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '000101'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$3, 18, true).slice(-18, -2); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$3, 18, true).slice(0, -2); }, 'offset', ''],
     ]);
     newInstruction('bgez', '大于等于0分支', 'if ((rs)≥0) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '00001'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(-18, -2); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(0, -2); }, 'offset', ''],
     ]);
     newInstruction('bgtz', '大于0分支', 'if ((rs)＞0) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000111'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '00000'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(-18, -2); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(0, -2); }, 'offset', ''],
     ]);
-    newInstruction('blez', '小于等于0分支', 'if ((rs)≤0) then (PC)←(PC)+4+((Sign-Extend) offset<<2)', paramPattern(2), [
+    newInstruction('blez', '小于等于0分支', 'if ((rs)≤0) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000110'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '00000'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(-18, -2); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(0, -2); }, 'offset', ''],
     ]);
     newInstruction('bltz', '小于0分支', 'if ((rs)＜0) then (PC)←(PC)+4+((Sign-Extend) offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000111'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '00000'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(-18, -2); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(0, -2); }, 'offset', ''],
     ]);
     newInstruction('bgezal', '大于等于0分支（Link）', 'if ((rs)≥0) then ($31)←(PC)+4,(PC)←(PC)+4+((Sign-Extend) offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '10001'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(-18, -2); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(0, -2); }, 'offset', ''],
     ]);
     newInstruction('bltzal', '小于0分支（Link）', 'if ((rs)＜0) then ($31)←(PC)+4,(PC)←(PC)+4+((Sign-Extend) offset<<2)', paramPattern(2), [
         [31, 26, 'op', function () { }, 'fixed', '000001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
         [20, 16, 'rt', function () { }, 'fixed', '10000'],
-        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(-18, -2); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.literalToBin(RegExp.$2, 18, true).slice(0, -2); }, 'offset', ''],
     ]);
     newInstruction('slti', '小于立即数时Set', 'if ((rs)<(Sign-Extend)immediate) then (rt)←1; else (rt)←0', paramPattern(3), [
         [31, 26, 'op', function () { }, 'fixed', '001010'],
@@ -497,11 +497,11 @@ exports.MinisysInstructions = (function () {
     // =================== J型指令 ===================
     newInstruction('j', '无条件跳转', '(PC)←((Zero-Extend)address<<2)', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000010'],
-        [25, 0, 'target', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'addr', ''],
+        [25, 0, 'target', function () { return utils_1.literalToBin(RegExp.$1, 28).slice(0, -2); }, 'addr', ''],
     ]);
     newInstruction('jal', '暂存下条后跳转（立即数）', '($31)←(PC)+4; (PC)←((Zero-Extend)address<<2),', paramPattern(1), [
         [31, 26, 'op', function () { }, 'fixed', '000011'],
-        [25, 0, 'target', function () { return utils_1.literalToBin(RegExp.$2, 18).slice(-18, -2); }, 'addr', ''],
+        [25, 0, 'target', function () { return utils_1.literalToBin(RegExp.$1, 28).slice(0, -2); }, 'addr', ''],
     ]);
     // =================== NOP指令 ===================
     newInstruction('nop', '空转指令', 'do nothing', paramPattern(0), [[31, 0, 'NOP', function () { }, 'fixed', '0'.repeat(32)]]);

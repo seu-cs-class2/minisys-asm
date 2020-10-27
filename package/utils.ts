@@ -9,12 +9,15 @@ export function assert(ensure: unknown, hint?: string) {
 
 /**
  * 把字面量数字转换为二进制
+ * @param literal 要转换的字面量数字
+ * @param len 转换后的最少位数
+ * @param isSignExtend 转换后位数不足时是否进行符号扩展，默认采用零扩展
  * @example 10
  * @example 0xabcd
  */
 export function literalToBin(literal: string, len: number, isSignExtend: boolean = false) {
   if (literal.startsWith('0x')) {
-    let num =  hexToBin(literal)
+    let num = hexToBin(literal)
     return num.padStart(len, isSignExtend ? num[0] : '0')
   } else {
     return decToBin(parseInt(literal), len, isSignExtend)
@@ -27,7 +30,7 @@ export function literalToBin(literal: string, len: number, isSignExtend: boolean
 export function decToBin(dec: number, len: number, isSignExtend: boolean = false) {
   let num: string = ''
   if (dec < 0) {
-    num = '1' + (-dec-1).toString(2).split('').map(v => { return String.fromCharCode(v.charCodeAt(0)^1)}).join('')
+    num = '1' + (-dec - 1).toString(2).split('').map(v => { return String.fromCharCode(v.charCodeAt(0) ^ 1) }).join('')
   } else {
     num = '0' + dec.toString(2)
   }
