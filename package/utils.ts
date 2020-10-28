@@ -16,6 +16,7 @@ export function assert(ensure: unknown, hint?: string) {
  * @example 0xabcd
  */
 export function literalToBin(literal: string, len: number, isSignExtend: boolean = false) {
+  assert(!isNaN(Number(literal)), `错误的参数：${literal}`)
   if (literal.startsWith('0x')) {
     let num = hexToBin(literal)
     return num.padStart(len, isSignExtend ? num[0] : '0')
