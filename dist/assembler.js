@@ -216,9 +216,14 @@ function parseOneLine(asm, labels, lineno) {
     utils_1.assert(res.insPattern.test(asm), "\u7B2C " + lineno + " \u884C\u6307\u4EE4\u53C2\u6570\u4E0D\u5339\u914D\uFF1A" + asm);
     res.components.forEach(function (component) {
         if (!component.val.trim()) {
-            var arg = component.toBin();
-            // TODO: 目前暂未支持变量名的转换
-            res.setComponent(component.desc, arg);
+            try {
+                var arg = component.toBin();
+                // TODO: 目前暂未支持变量名的转换
+                res.setComponent(component.desc, arg);
+            }
+            catch (err) {
+                throw new Error(err.message + ("\uFF0C\u5728\u7B2C " + lineno + "\u884C"));
+            }
         }
     });
     return res;

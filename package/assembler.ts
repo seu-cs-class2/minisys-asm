@@ -269,9 +269,13 @@ export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number
   assert(res.insPattern.test(asm), `第 ${lineno} 行指令参数不匹配：${asm}`)
   res.components.forEach(component => {
     if (!component.val.trim()) {
-      let arg = component.toBin()
-      // TODO: 目前暂未支持变量名的转换
-      res.setComponent(component.desc, arg)
+      try {
+        let arg = component.toBin()
+        // TODO: 目前暂未支持变量名的转换
+        res.setComponent(component.desc, arg)
+      } catch(err) {
+        throw new Error(err.message + `，在第 ${lineno}行`)
+      }
     }
   })
 
