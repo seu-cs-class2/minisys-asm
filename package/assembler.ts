@@ -132,7 +132,7 @@ function parseDataSeg(asm: string[]) {
   // 解析初始化值
   const parseInitValue = (init: string) => init.split(/\s*,/).map(v => v.trim())
 
-  const startAddr = asm[0].split(/\s+/)[1] || "0"
+  const startAddr = asm[0].split(/\s+/)[1] || '0'
   assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。')
 
   const VarStartPattern = /(.+):\s+\.(word|byte|half|ascii|space)\s+(.+)/
@@ -191,7 +191,7 @@ function parseDataSeg(asm: string[]) {
  */
 function parseTextSeg(asm_: string[]) {
   let asm = Array.from(asm_)
-  const startAddr = asm[0].split(/\s+/)[1] || "0"
+  const startAddr = asm[0].split(/\s+/)[1] || '0'
   assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。')
 
   // 先提取掉所有的label
@@ -209,7 +209,7 @@ function parseTextSeg(asm_: string[]) {
     }
     return v
   })
-  labels.sort((a, b) => { return b.name.length - a.name.length })
+  labels.sort((a, b) => b.name.length - a.name.length)
 
   let ins: Instruction[] = []
   asm.forEach((v, i) => {
@@ -255,10 +255,7 @@ export function assemble(asm_: string) {
  */
 export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number) {
   // 处理助记符
-  assert(
-    /^\s*(\w+)\s+(.*)/.test(asm),
-    `没有找到指令助记符，在第 ${lineno} 行。`
-  )
+  assert(/^\s*(\w+)\s+(.*)/.test(asm), `没有找到指令助记符，在第 ${lineno} 行。`)
   const symbol = RegExp.$1
   asm = serialString(RegExp.$2)
   labels.forEach(label => {
@@ -269,10 +266,7 @@ export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number
 
   let res = Instruction.newInstance(MinisysInstructions[instructionIndex])
 
-  assert(
-    res.insPattern.test(asm),
-    `第 ${lineno} 行指令参数不匹配：${asm}`
-  )
+  assert(res.insPattern.test(asm), `第 ${lineno} 行指令参数不匹配：${asm}`)
   res.components.forEach(component => {
     if (!component.val.trim()) {
       let arg = component.toBin()
