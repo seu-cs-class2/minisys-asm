@@ -91,7 +91,7 @@ exports.TextSeg = TextSeg;
 function parseDataSeg(asm) {
     // 解析初始化值
     var parseInitValue = function (init) { return init.split(/\s*,/).map(function (v) { return v.trim(); }); };
-    var startAddr = asm[0].split(/\s+/)[1] || "0";
+    var startAddr = asm[0].split(/\s+/)[1] || '0';
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。');
     var VarStartPattern = /(.+):\s+\.(word|byte|half|ascii|space)\s+(.+)/;
     var VarContdPattern = /\.(word|byte|half|ascii|space)\s+(.+)/;
@@ -149,7 +149,7 @@ function parseDataSeg(asm) {
  */
 function parseTextSeg(asm_) {
     var asm = Array.from(asm_);
-    var startAddr = asm[0].split(/\s+/)[1] || "0";
+    var startAddr = asm[0].split(/\s+/)[1] || '0';
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
     // 先提取掉所有的label
     var labels = [];
