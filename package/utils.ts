@@ -9,17 +9,17 @@ export function assert(ensure: unknown, hint?: string) {
   }
 }
 
-export function labelToBin(label: string, len: number) {
+export function labelToBin(label: string, len: number, isSignExtend: boolean = false) {
   try {
-    return literalToBin(label, len, true)
+    return literalToBin(label, len, isSignExtend)
   } catch (e) {
     return literalToBin(getLabelAddr(label).toString(), len, true)
   }
 }
 
-export function varToAddrBin(name: string, len: number) {
+export function varToAddrBin(name: string, len: number, isSignExtend: boolean = false) {
   try {
-    return literalToBin(name, len)
+    return literalToBin(name, len, isSignExtend)
   } catch(e) {
     return literalToBin(getVarAddr(name).toString(), len)
   }

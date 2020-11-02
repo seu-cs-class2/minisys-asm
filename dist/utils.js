@@ -11,18 +11,20 @@ function assert(ensure, hint) {
     }
 }
 exports.assert = assert;
-function labelToBin(label, len) {
+function labelToBin(label, len, isSignExtend) {
+    if (isSignExtend === void 0) { isSignExtend = false; }
     try {
-        return literalToBin(label, len, true);
+        return literalToBin(label, len, isSignExtend);
     }
     catch (e) {
         return literalToBin(assembler_1.getLabelAddr(label).toString(), len, true);
     }
 }
 exports.labelToBin = labelToBin;
-function varToAddrBin(name, len) {
+function varToAddrBin(name, len, isSignExtend) {
+    if (isSignExtend === void 0) { isSignExtend = false; }
     try {
-        return literalToBin(name, len);
+        return literalToBin(name, len, isSignExtend);
     }
     catch (e) {
         return literalToBin(assembler_1.getVarAddr(name).toString(), len);
