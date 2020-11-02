@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOffsetAddr = exports.getOffset = exports.serialString = exports.hexToBin = exports.hexToDec = exports.decToHex = exports.binToHex = exports.decToBin = exports.literalToBin = exports.assert = void 0;
+exports.getOffsetAddr = exports.getOffset = exports.sizeof = exports.serialString = exports.hexToBin = exports.hexToDec = exports.decToHex = exports.binToHex = exports.decToBin = exports.literalToBin = exports.varToAddrBin = exports.labelToBin = exports.assert = void 0;
+var assembler_1 = require("./assembler");
 /**
  * Ensure `ensure`, else throw `Error(hint)`.
  */
@@ -10,6 +11,24 @@ function assert(ensure, hint) {
     }
 }
 exports.assert = assert;
+function labelToBin(label, len) {
+    try {
+        return literalToBin(label, len, true);
+    }
+    catch (e) {
+        return literalToBin(assembler_1.getLabelAddr(label).toString(), len, true);
+    }
+}
+exports.labelToBin = labelToBin;
+function varToAddrBin(name, len) {
+    try {
+        return literalToBin(name, len);
+    }
+    catch (e) {
+        return literalToBin(assembler_1.getVarAddr(name).toString(), len);
+    }
+}
+exports.varToAddrBin = varToAddrBin;
 /**
  * 把字面量数字转换为二进制
  * @param literal 要转换的字面量数字
@@ -99,6 +118,27 @@ function serialString(bin) {
     return bin.replace(/\s+/g, '');
 }
 exports.serialString = serialString;
+/**
+ *
+ * @param type
+ */
+function sizeof(type) {
+    switch (type.toLowerCase()) {
+        case 'byte':
+            return 1;
+        case 'half':
+            return 2;
+        case 'word':
+            return 4;
+        case 'space':
+            return 1;
+        case 'ascii':
+            return 1;
+        default:
+            throw new Error("\u9519\u8BEF\u7684\u53D8\u91CF\u7C7B\u578B\uFF1A" + type);
+    }
+}
+exports.sizeof = sizeof;
 /**
  * 算地址偏移量
  */

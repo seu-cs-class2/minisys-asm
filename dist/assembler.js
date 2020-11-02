@@ -11,7 +11,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseOneLine = exports.assemble = exports.TextSeg = exports.DataSeg = void 0;
+exports.parseOneLine = exports.assemble = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
 var instruction_1 = require("./instruction");
 var utils_1 = require("./utils");
 var DataSeg = /** @class */ (function () {
@@ -33,11 +33,12 @@ var DataSeg = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
-    DataSeg.prototype.newVar = function (name, comps) {
+    DataSeg.prototype.newVar = function (name, comps, addr) {
         utils_1.assert(this._vars.every(function (v) { return v.name !== name; }), '重复的变量名。');
         this._vars.push({
             name: name,
             comps: __spreadArrays(comps),
+            addr: addr,
         });
     };
     DataSeg.prototype.newComp = function (name, comp) {
@@ -84,6 +85,17 @@ var TextSeg = /** @class */ (function () {
     return TextSeg;
 }());
 exports.TextSeg = TextSeg;
+var vars = [];
+function getVarAddr(name) {
+    var res = vars.find(function (v) { return v.name == name; });
+    if (res === undefined) {
+        throw new Error("\u672A\u77E5\u7684\u53D8\u91CF\uFF1A" + name);
+    }
+    else {
+        return res.addr;
+    }
+}
+exports.getVarAddr = getVarAddr;
 /**
  * 解析数据段
  * @param asm 从.data开始，到.text的前一行
@@ -95,8 +107,10 @@ function parseDataSeg(asm) {
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。');
     var VarStartPattern = /(.+):\s+\.(word|byte|half|ascii|space)\s+(.+)/;
     var VarContdPattern = /\.(word|byte|half|ascii|space)\s+(.+)/;
-    var vars = [], comps = [], name;
+    var comps = [], name;
     var i = 1;
+    var addr = 0, nextAddr = 0;
+    vars = [];
     var _loop_1 = function () {
         if (VarStartPattern.test(asm[i])) {
             // 一个新变量开始
@@ -104,27 +118,39 @@ function parseDataSeg(asm) {
                 vars.push({
                     name: name,
                     comps: comps,
+                    addr: addr,
                 });
                 comps = [];
                 name = void 0;
+                addr = nextAddr;
             }
             name = RegExp.$1;
             var type_1 = RegExp.$2;
+            var size_1 = utils_1.sizeof(type_1);
+            if (addr % size_1 > 0) {
+                nextAddr = addr = addr + size_1 - addr % size_1;
+            }
             parseInitValue(RegExp.$3).forEach(function (val) {
                 comps.push({
                     type: type_1,
                     val: val,
                 });
+                nextAddr += size_1;
             });
         }
         else if (VarContdPattern.test(asm[i])) {
             // 变量组分继续
             var type_2 = RegExp.$1;
+            var size_2 = utils_1.sizeof(type_2);
+            if (nextAddr % size_2 > 0) {
+                nextAddr = nextAddr + size_2 - nextAddr % size_2;
+            }
             parseInitValue(RegExp.$2).forEach(function (val) {
                 comps.push({
                     type: type_2,
                     val: val,
                 });
+                nextAddr += size_2;
             });
         }
         else {
@@ -134,6 +160,7 @@ function parseDataSeg(asm) {
             vars.push({
                 name: name,
                 comps: comps,
+                addr: addr,
             });
         }
         i++;
@@ -143,6 +170,17 @@ function parseDataSeg(asm) {
     } while (i < asm.length);
     return new DataSeg(startAddr, vars);
 }
+var labels = [];
+function getLabelAddr(label) {
+    var res = labels.find(function (l) { return l.name == label; });
+    if (res === undefined) {
+        throw new Error("\u672A\u77E5\u7684label\uFF1A" + label);
+    }
+    else {
+        return res.addr;
+    }
+}
+exports.getLabelAddr = getLabelAddr;
 /**
  * 解析代码段
  * @param asm .text起，到代码段结束
@@ -152,7 +190,7 @@ function parseTextSeg(asm_) {
     var startAddr = asm[0].split(/\s+/)[1] || '0';
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
     // 先提取掉所有的label
-    var labels = [];
+    labels = [];
     asm = asm.map(function (v, i) {
         if (i === 0)
             return v;
@@ -164,7 +202,6 @@ function parseTextSeg(asm_) {
         }
         return v;
     });
-    labels.sort(function (a, b) { return b.name.length - a.name.length; });
     var ins = [];
     asm.forEach(function (v, i) {
         i !== 0 && ins.push(parseOneLine(v, labels, i));
@@ -207,9 +244,6 @@ function parseOneLine(asm, labels, lineno) {
     utils_1.assert(/^\s*(\w+)\s+(.*)/.test(asm), "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     var symbol = RegExp.$1;
     asm = utils_1.serialString(RegExp.$2);
-    labels.forEach(function (label) {
-        asm = asm.replace(new RegExp(label.name, 'gm'), label.addr.toString());
-    });
     var instructionIndex = instruction_1.MinisysInstructions.findIndex(function (x) { return x.symbol == symbol; });
     utils_1.assert(instructionIndex !== -1, "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol + "\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     var res = instruction_1.Instruction.newInstance(instruction_1.MinisysInstructions[instructionIndex]);

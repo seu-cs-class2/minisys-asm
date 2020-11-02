@@ -1,9 +1,27 @@
+import { getLabelAddr, getVarAddr } from "./assembler"
+
 /**
  * Ensure `ensure`, else throw `Error(hint)`.
  */
 export function assert(ensure: unknown, hint?: string) {
   if (!ensure) {
     throw new Error(hint)
+  }
+}
+
+export function labelToBin(label: string, len: number) {
+  try {
+    return literalToBin(label, len, true)
+  } catch (e) {
+    return literalToBin(getLabelAddr(label).toString(), len, true)
+  }
+}
+
+export function varToAddrBin(name: string, len: number) {
+  try {
+    return literalToBin(name, len)
+  } catch(e) {
+    return literalToBin(getVarAddr(name).toString(), len)
   }
 }
 
@@ -90,6 +108,27 @@ export function hexToBin(hex: string) {
  */
 export function serialString(bin: string) {
   return bin.replace(/\s+/g, '')
+}
+
+/**
+ * 
+ * @param type 
+ */
+export function sizeof(type: string) {
+  switch(type.toLowerCase()) {
+    case 'byte':
+      return 1
+    case 'half':
+      return 2
+    case 'word':
+      return 4
+    case 'space':
+      return 1
+    case 'ascii':
+      return 1
+    default:
+      throw new Error(`错误的变量类型：${type}`)
+  }
 }
 
 /**

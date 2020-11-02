@@ -3,8 +3,9 @@
  * by z0gSh1u @ 2020-10
  */
 
+import { maxHeaderSize } from 'http'
 import { Instruction, MinisysInstructions } from './instruction'
-import { assert, getOffset, getOffsetAddr, serialString } from './utils'
+import { assert, getOffset, getOffsetAddr, serialString, sizeof } from './utils'
 
 type HexAddr = string
 type VarCompType = 'byte' | 'half' | 'word' | 'ascii' | 'space'
@@ -37,6 +38,7 @@ interface DataSegVarComp {
 interface DataSegVar {
   name: string
   comps: DataSegVarComp[]
+  addr: number
 }
 
 export class DataSeg {
@@ -56,7 +58,7 @@ export class DataSeg {
     this._vars = Array.from(vars)
   }
 
-  newVar(name: string, comps: DataSegVarComp[]) {
+  newVar(name: string, comps: DataSegVarComp[], addr: number) {
     assert(
       this._vars.every(v => v.name !== name),
       '重复的变量名。'
@@ -64,6 +66,7 @@ export class DataSeg {
     this._vars.push({
       name,
       comps: [...comps],
+      addr,
     })
   }
 
@@ -124,6 +127,17 @@ export class TextSeg {
   }
 }
 
+let vars: DataSegVar[] = []
+
+export function getVarAddr(name: string) {
+  let res = vars.find(v => { return v.name == name })
+  if (res === undefined) {
+    throw new Error(`未知的变量：${name}`)
+  } else {
+    return res.addr
+  }
+}
+
 /**
  * 解析数据段
  * @param asm 从.data开始，到.text的前一行
@@ -137,10 +151,12 @@ function parseDataSeg(asm: string[]) {
 
   const VarStartPattern = /(.+):\s+\.(word|byte|half|ascii|space)\s+(.+)/
   const VarContdPattern = /\.(word|byte|half|ascii|space)\s+(.+)/
-  let vars: DataSegVar[] = [],
-    comps: DataSegVarComp[] = [],
+  let comps: DataSegVarComp[] = [],
     name
   let i = 1
+  let addr = 0,
+    nextAddr = 0
+  vars = []
 
   do {
     if (VarStartPattern.test(asm[i])) {
@@ -149,26 +165,38 @@ function parseDataSeg(asm: string[]) {
         vars.push({
           name,
           comps,
+          addr,
         })
         comps = []
         name = void 0
+        addr = nextAddr
       }
       name = RegExp.$1
       const type = RegExp.$2 as VarCompType
+      const size = sizeof(type as string)
+      if (addr % size > 0) {
+        nextAddr = addr = addr + size - addr % size
+      }
       parseInitValue(RegExp.$3).forEach(val => {
         comps.push({
           type,
           val,
         })
+        nextAddr += size
       })
     } else if (VarContdPattern.test(asm[i])) {
       // 变量组分继续
       const type = RegExp.$1 as VarCompType
+      const size = sizeof(type as string)
+      if (nextAddr % size > 0) {
+        nextAddr = nextAddr + size - nextAddr % size
+      }
       parseInitValue(RegExp.$2).forEach(val => {
         comps.push({
           type,
           val,
         })
+        nextAddr += size
       })
     } else {
       assert(false, `未知的变量定义形式，数据段行号: ${i + 1}`)
@@ -177,12 +205,24 @@ function parseDataSeg(asm: string[]) {
       vars.push({
         name: name as string,
         comps,
+        addr,
       })
     }
     i++
   } while (i < asm.length)
 
   return new DataSeg(startAddr, vars)
+}
+
+let labels: TextSegLabel[] = []
+
+export function getLabelAddr(label: string) {
+  let res = labels.find(l => { return l.name == label })
+  if (res === undefined) {
+    throw new Error(`未知的label：${label}`)
+  } else {
+    return res.addr
+  }
 }
 
 /**
@@ -195,7 +235,7 @@ function parseTextSeg(asm_: string[]) {
   assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。')
 
   // 先提取掉所有的label
-  let labels: TextSegLabel[] = []
+  labels = []
   asm = asm.map((v, i) => {
     if (i === 0) return v
     if (/(\w+):\s*(.+)/.test(v)) {
@@ -209,7 +249,6 @@ function parseTextSeg(asm_: string[]) {
     }
     return v
   })
-  labels.sort((a, b) => b.name.length - a.name.length)
 
   let ins: Instruction[] = []
   asm.forEach((v, i) => {
@@ -258,9 +297,6 @@ export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number
   assert(/^\s*(\w+)\s+(.*)/.test(asm), `没有找到指令助记符，在第 ${lineno} 行。`)
   const symbol = RegExp.$1
   asm = serialString(RegExp.$2)
-  labels.forEach(label => {
-    asm = asm.replace(new RegExp(label.name, 'gm'), label.addr.toString())
-  })
   const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
   assert(instructionIndex !== -1, `没有找到指令助记符：${symbol}，在第 ${lineno} 行。`)
 
@@ -273,7 +309,7 @@ export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number
         let arg = component.toBin()
         // TODO: 目前暂未支持变量名的转换
         res.setComponent(component.desc, arg)
-      } catch(err) {
+      } catch (err) {
         throw new Error(err.message + `，在第 ${lineno}行`)
       }
     }
