@@ -128,6 +128,8 @@ export class TextSeg {
 }
 
 let vars: DataSegVar[] = []
+let labels: TextSegLabel[] = []
+let pc = 0
 
 export function getVarAddr(name: string) {
   let res = vars.find(v => { return v.name == name })
@@ -136,6 +138,19 @@ export function getVarAddr(name: string) {
   } else {
     return res.addr
   }
+}
+
+export function getLabelAddr(label: string) {
+  let res = labels.find(l => { return l.name == label })
+  if (res === undefined) {
+    throw new Error(`未知的label：${label}`)
+  } else {
+    return res.addr
+  }
+}
+
+export function getPC() {
+  return pc
 }
 
 /**
@@ -214,17 +229,6 @@ function parseDataSeg(asm: string[]) {
   return new DataSeg(startAddr, vars)
 }
 
-let labels: TextSegLabel[] = []
-
-export function getLabelAddr(label: string) {
-  let res = labels.find(l => { return l.name == label })
-  if (res === undefined) {
-    throw new Error(`未知的label：${label}`)
-  } else {
-    return res.addr
-  }
-}
-
 /**
  * 解析代码段
  * @param asm .text起，到代码段结束
@@ -288,12 +292,6 @@ export function assemble(asm_: string) {
     dataSeg,
     textSeg,
   } as AsmProgram
-}
-
-let pc = 0
-
-export function getPC() {
-  return pc
 }
 
 /**

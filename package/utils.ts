@@ -9,20 +9,32 @@ export function assert(ensure: unknown, hint?: string) {
   }
 }
 
+/**
+ * 将label或字面量转换为二进制
+ * @param label label名称或字面量数字
+ * @param len 转换后的长度
+ * @param isOffset 转换而成的是否为相对当前地址的偏移量
+ * @param isSignExtend 转换后位数不足时是否进行符号扩展，默认采用零扩展
+ */
 export function labelToBin(label: string, len: number, isOffset: boolean, isSignExtend: boolean = false) {
   try {
-    return literalToBin(label, len, isSignExtend)
+    return literalToBin(label, len, isSignExtend).slice(-len)
   } catch (e) {
-    return literalToBin((getLabelAddr(label) - (isOffset ? getPC() : 0)).toString(), len, isOffset)
+    return literalToBin((getLabelAddr(label) - (isOffset ? getPC() : 0)).toString(), len, isOffset).slice(-len)
   }
 }
 
-// TODO: 地址位数多于len且高位不全为零该如何处理？
+/**
+ * 将变量名或字面量转换为二进制
+ * @param name 变量名称或字面量数字
+ * @param len 转换后的长度
+ * @param isSignExtend 转换后位数不足时是否进行符号扩展，默认采用零扩展
+ */
 export function varToAddrBin(name: string, len: number, isSignExtend: boolean = false) {
   try {
-    return literalToBin(name, len, isSignExtend)
+    return literalToBin(name, len, isSignExtend).slice(-len)
   } catch(e) {
-    return literalToBin(getVarAddr(name).toString(), len)
+    return literalToBin(getVarAddr(name).toString(), len).slice(-len)
   }
 }
 
@@ -112,8 +124,8 @@ export function serialString(bin: string) {
 }
 
 /**
- * 
- * @param type 
+ * 获取变量占用的字节数
+ * @param type 变量类型名
  */
 export function sizeof(type: string) {
   switch(type.toLowerCase()) {

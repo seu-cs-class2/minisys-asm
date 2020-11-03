@@ -471,7 +471,7 @@ export const MinisysInstructions: Instruction[] = (function () {
       [31, 26, 'op', nop, 'fixed', '100000'],
       [25, 21, 'rs', () => regToBin(RegExp.$3), 'reg', ''],
       [20, 16, 'rt', () => regToBin(RegExp.$1), 'reg', ''],
-      [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true).slice(-16), 'offset', ''],
+      [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true), 'offset', ''],
     ]
   )
 
@@ -484,7 +484,7 @@ export const MinisysInstructions: Instruction[] = (function () {
       [31, 26, 'op', nop, 'fixed', '100100'],
       [25, 21, 'rs', () => regToBin(RegExp.$3), 'reg', ''],
       [20, 16, 'rt', () => regToBin(RegExp.$1), 'reg', ''],
-      [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true).slice(-16), 'offset', ''],
+      [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true), 'offset', ''],
     ]
   )
 
@@ -497,7 +497,7 @@ export const MinisysInstructions: Instruction[] = (function () {
       [31, 26, 'op', nop, 'fixed', '100001'],
       [25, 21, 'rs', () => regToBin(RegExp.$3), 'reg', ''],
       [20, 16, 'rt', () => regToBin(RegExp.$1), 'reg', ''],
-      [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true).slice(-16), 'offset', ''],
+      [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true), 'offset', ''],
     ]
   )
 
@@ -510,7 +510,7 @@ export const MinisysInstructions: Instruction[] = (function () {
       [31, 26, 'op', nop, 'fixed', '100101'],
       [25, 21, 'rs', () => regToBin(RegExp.$3), 'reg', ''],
       [20, 16, 'rt', () => regToBin(RegExp.$1), 'reg', ''],
-      [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true).slice(-16), 'offset', ''],
+      [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true), 'offset', ''],
     ]
   )
 
@@ -518,28 +518,28 @@ export const MinisysInstructions: Instruction[] = (function () {
     [31, 26, 'op', nop, 'fixed', '101000'],
     [25, 21, 'rs', () => regToBin(RegExp.$3), 'reg', ''],
     [20, 16, 'rt', () => regToBin(RegExp.$1), 'reg', ''],
-    [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true).slice(-16), 'offset', ''],
+    [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true), 'offset', ''],
   ])
 
   newInstruction('sh', '存半字', 'Memory[(rs)+(sign_extend)offset]←(rt)15..0', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
     [31, 26, 'op', nop, 'fixed', '101001'],
     [25, 21, 'rs', () => regToBin(RegExp.$3), 'reg', ''],
     [20, 16, 'rt', () => regToBin(RegExp.$1), 'reg', ''],
-    [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true).slice(-16), 'offset', ''],
+    [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true), 'offset', ''],
   ])
 
   newInstruction('lw', '取字', '(rt)←Memory[(rs)+(sign_extend)offset]', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
     [31, 26, 'op', nop, 'fixed', '100011'],
     [25, 21, 'rs', () => regToBin(RegExp.$3), 'reg', ''],
     [20, 16, 'rt', () => regToBin(RegExp.$1), 'reg', ''],
-    [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true).slice(-16), 'offset', ''],
+    [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true), 'offset', ''],
   ])
 
   newInstruction('sw', '存字', 'Memory[(rs)+(sign_extend)offset]←(rt)', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
     [31, 26, 'op', nop, 'fixed', '101011'],
     [25, 21, 'rs', () => regToBin(RegExp.$3), 'reg', ''],
     [20, 16, 'rt', () => regToBin(RegExp.$1), 'reg', ''],
-    [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true).slice(-16), 'offset', ''],
+    [15, 0, 'offset', () => varToAddrBin(RegExp.$2, 16, true), 'offset', ''],
   ])
 
   newInstruction('beq', '相等分支', 'if ((rt)=(rs)) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(3), [

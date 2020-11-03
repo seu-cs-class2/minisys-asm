@@ -11,7 +11,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseOneLine = exports.getPC = exports.assemble = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
+exports.parseOneLine = exports.assemble = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
 var instruction_1 = require("./instruction");
 var utils_1 = require("./utils");
 var DataSeg = /** @class */ (function () {
@@ -86,6 +86,8 @@ var TextSeg = /** @class */ (function () {
 }());
 exports.TextSeg = TextSeg;
 var vars = [];
+var labels = [];
+var pc = 0;
 function getVarAddr(name) {
     var res = vars.find(function (v) { return v.name == name; });
     if (res === undefined) {
@@ -96,6 +98,20 @@ function getVarAddr(name) {
     }
 }
 exports.getVarAddr = getVarAddr;
+function getLabelAddr(label) {
+    var res = labels.find(function (l) { return l.name == label; });
+    if (res === undefined) {
+        throw new Error("\u672A\u77E5\u7684label\uFF1A" + label);
+    }
+    else {
+        return res.addr;
+    }
+}
+exports.getLabelAddr = getLabelAddr;
+function getPC() {
+    return pc;
+}
+exports.getPC = getPC;
 /**
  * 解析数据段
  * @param asm 从.data开始，到.text的前一行
@@ -170,17 +186,6 @@ function parseDataSeg(asm) {
     } while (i < asm.length);
     return new DataSeg(startAddr, vars);
 }
-var labels = [];
-function getLabelAddr(label) {
-    var res = labels.find(function (l) { return l.name == label; });
-    if (res === undefined) {
-        throw new Error("\u672A\u77E5\u7684label\uFF1A" + label);
-    }
-    else {
-        return res.addr;
-    }
-}
-exports.getLabelAddr = getLabelAddr;
 /**
  * 解析代码段
  * @param asm .text起，到代码段结束
@@ -237,11 +242,6 @@ function assemble(asm_) {
     };
 }
 exports.assemble = assemble;
-var pc = 0;
-function getPC() {
-    return pc;
-}
-exports.getPC = getPC;
 /**
  * 解析单行汇编到Instruction对象
  */
