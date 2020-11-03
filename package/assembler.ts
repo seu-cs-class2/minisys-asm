@@ -236,6 +236,7 @@ function parseTextSeg(asm_: string[]) {
 
   // 先提取掉所有的label
   labels = []
+  pc = 0
   asm = asm.map((v, i) => {
     if (i === 0) return v
     if (/(\w+):\s*(.+)/.test(v)) {
@@ -289,6 +290,12 @@ export function assemble(asm_: string) {
   } as AsmProgram
 }
 
+let pc = 0
+
+export function getPC() {
+  return pc
+}
+
 /**
  * 解析单行汇编到Instruction对象
  */
@@ -297,6 +304,7 @@ export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number
   assert(/^\s*(\w+)\s+(.*)/.test(asm), `没有找到指令助记符，在第 ${lineno} 行。`)
   const symbol = RegExp.$1
   asm = serialString(RegExp.$2)
+  pc += sizeof('ins')
   const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
   assert(instructionIndex !== -1, `没有找到指令助记符：${symbol}，在第 ${lineno} 行。`)
 
@@ -306,9 +314,7 @@ export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number
   res.components.forEach(component => {
     if (!component.val.trim()) {
       try {
-        let arg = component.toBin()
-        // TODO: 目前暂未支持变量名的转换
-        res.setComponent(component.desc, arg)
+        res.setComponent(component.desc, component.toBin())
       } catch (err) {
         throw new Error(err.message + `，在第 ${lineno}行`)
       }

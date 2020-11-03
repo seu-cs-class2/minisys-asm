@@ -11,13 +11,13 @@ function assert(ensure, hint) {
     }
 }
 exports.assert = assert;
-function labelToBin(label, len, isSignExtend) {
+function labelToBin(label, len, isOffset, isSignExtend) {
     if (isSignExtend === void 0) { isSignExtend = false; }
     try {
         return literalToBin(label, len, isSignExtend);
     }
     catch (e) {
-        return literalToBin(assembler_1.getLabelAddr(label).toString(), len, true);
+        return literalToBin((assembler_1.getLabelAddr(label) - (isOffset ? assembler_1.getPC() : 0)).toString(), len, isOffset);
     }
 }
 exports.labelToBin = labelToBin;
@@ -136,6 +136,8 @@ function sizeof(type) {
             return 1;
         case 'ascii':
             return 1;
+        case 'ins':
+            return 4;
         default:
             throw new Error("\u9519\u8BEF\u7684\u53D8\u91CF\u7C7B\u578B\uFF1A" + type);
     }

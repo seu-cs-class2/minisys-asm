@@ -11,7 +11,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseOneLine = exports.assemble = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
+exports.parseOneLine = exports.getPC = exports.assemble = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
 var instruction_1 = require("./instruction");
 var utils_1 = require("./utils");
 var DataSeg = /** @class */ (function () {
@@ -191,6 +191,7 @@ function parseTextSeg(asm_) {
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
     // 先提取掉所有的label
     labels = [];
+    pc = 0;
     asm = asm.map(function (v, i) {
         if (i === 0)
             return v;
@@ -236,6 +237,11 @@ function assemble(asm_) {
     };
 }
 exports.assemble = assemble;
+var pc = 0;
+function getPC() {
+    return pc;
+}
+exports.getPC = getPC;
 /**
  * 解析单行汇编到Instruction对象
  */
@@ -244,6 +250,7 @@ function parseOneLine(asm, labels, lineno) {
     utils_1.assert(/^\s*(\w+)\s+(.*)/.test(asm), "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     var symbol = RegExp.$1;
     asm = utils_1.serialString(RegExp.$2);
+    pc += utils_1.sizeof('ins');
     var instructionIndex = instruction_1.MinisysInstructions.findIndex(function (x) { return x.symbol == symbol; });
     utils_1.assert(instructionIndex !== -1, "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol + "\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     var res = instruction_1.Instruction.newInstance(instruction_1.MinisysInstructions[instructionIndex]);
@@ -251,9 +258,7 @@ function parseOneLine(asm, labels, lineno) {
     res.components.forEach(function (component) {
         if (!component.val.trim()) {
             try {
-                var arg = component.toBin();
-                // TODO: 目前暂未支持变量名的转换
-                res.setComponent(component.desc, arg);
+                res.setComponent(component.desc, component.toBin());
             }
             catch (err) {
                 throw new Error(err.message + ("\uFF0C\u5728\u7B2C " + lineno + "\u884C"));

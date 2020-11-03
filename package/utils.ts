@@ -1,4 +1,4 @@
-import { getLabelAddr, getVarAddr } from "./assembler"
+import { getLabelAddr, getPC, getVarAddr } from "./assembler"
 
 /**
  * Ensure `ensure`, else throw `Error(hint)`.
@@ -9,11 +9,11 @@ export function assert(ensure: unknown, hint?: string) {
   }
 }
 
-export function labelToBin(label: string, len: number, isSignExtend: boolean = false) {
+export function labelToBin(label: string, len: number, isOffset: boolean, isSignExtend: boolean = false) {
   try {
     return literalToBin(label, len, isSignExtend)
   } catch (e) {
-    return literalToBin(getLabelAddr(label).toString(), len, true)
+    return literalToBin((getLabelAddr(label) - (isOffset ? getPC() : 0)).toString(), len, isOffset)
   }
 }
 
@@ -126,6 +126,8 @@ export function sizeof(type: string) {
       return 1
     case 'ascii':
       return 1
+    case 'ins':
+      return 4
     default:
       throw new Error(`错误的变量类型：${type}`)
   }
