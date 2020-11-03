@@ -118,7 +118,7 @@ function parseDataSeg(asm) {
                 vars.push({
                     name: name,
                     comps: comps,
-                    addr: addr,
+                    addr: utils_1.getOffsetAddr(startAddr, addr)
                 });
                 comps = [];
                 name = void 0;
@@ -160,7 +160,7 @@ function parseDataSeg(asm) {
             vars.push({
                 name: name,
                 comps: comps,
-                addr: addr,
+                addr: utils_1.getOffsetAddr(startAddr, addr),
             });
         }
         i++;
@@ -191,7 +191,7 @@ function parseTextSeg(asm_) {
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
     // 先提取掉所有的label
     labels = [];
-    pc = 0;
+    pc = utils_1.getOffsetAddr(startAddr, 0);
     asm = asm.map(function (v, i) {
         if (i === 0)
             return v;

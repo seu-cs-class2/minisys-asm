@@ -17,6 +17,7 @@ export function labelToBin(label: string, len: number, isOffset: boolean, isSign
   }
 }
 
+// TODO: 地址位数多于len且高位不全为零该如何处理？
 export function varToAddrBin(name: string, len: number, isSignExtend: boolean = false) {
   try {
     return literalToBin(name, len, isSignExtend)

@@ -21,6 +21,7 @@ function labelToBin(label, len, isOffset, isSignExtend) {
     }
 }
 exports.labelToBin = labelToBin;
+// TODO: 地址位数多于len且高位不全为零该如何处理？
 function varToAddrBin(name, len, isSignExtend) {
     if (isSignExtend === void 0) { isSignExtend = false; }
     try {

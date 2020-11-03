@@ -163,9 +163,9 @@ function parseDataSeg(asm: string[]) {
       // 一个新变量开始
       if (name !== void 0) {
         vars.push({
-          name,
-          comps,
-          addr,
+          name: name,
+          comps: comps,
+          addr: getOffsetAddr(startAddr, addr)
         })
         comps = []
         name = void 0
@@ -204,8 +204,8 @@ function parseDataSeg(asm: string[]) {
     if (i === asm.length - 1) {
       vars.push({
         name: name as string,
-        comps,
-        addr,
+        comps: comps,
+        addr: getOffsetAddr(startAddr, addr),
       })
     }
     i++
@@ -236,7 +236,7 @@ function parseTextSeg(asm_: string[]) {
 
   // 先提取掉所有的label
   labels = []
-  pc = 0
+  pc = getOffsetAddr(startAddr, 0)
   asm = asm.map((v, i) => {
     if (i === 0) return v
     if (/(\w+):\s*(.+)/.test(v)) {
