@@ -1,25 +1,31 @@
 "use strict";
 /**
  * Minisys指令定义
- * by z0gSh1u @ 2020-10
+ * by Withod, z0gSh1u @ 2020-10
  */
+var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MinisysInstructions = exports.Instruction = void 0;
 var register_1 = require("./register");
 var utils_1 = require("./utils");
 var nop = function () { };
-// 指令类
+/**
+ * 指令类
+ */
 var Instruction = /** @class */ (function () {
     function Instruction(symbol, desc, pseudo, insPattern, components) {
         this._symbol = symbol;
         this._desc = desc;
         this._pseudo = pseudo;
         this._insPattern = insPattern;
-        this._components = components.concat().map(function (x) { return ({
+        this._components = components.map(function (x) { return ({
             lBit: x.lBit,
             rBit: x.rBit,
             desc: x.desc,
-            toBin: x.toBin,
+            toBinary: x.toBinary,
             type: x.type,
             val: x.val,
         }); });
@@ -77,17 +83,24 @@ var Instruction = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    /**
+     * 设置指令组分
+     */
     Instruction.prototype.setComponent = function (desc, val) {
         var index = this._components.findIndex(function (v) { return v.desc == desc; });
         utils_1.assert(index !== -1, "\u672A\u77E5\u7684\u6307\u4EE4\u7EC4\u5206: " + desc);
         this._components[index].val = val;
     };
+    /**
+     * 指令转二进制
+     */
     Instruction.prototype.toBinary = function () {
-        if (this._components.some(function (v) { return !v.val.trim(); })) {
-            throw new Error('尝试将不完整的指令转为2或16进制。');
-        }
+        utils_1.assert(!this._components.some(function (v) { return !v.val.trim(); }), '尝试将不完整的指令转为2或16进制。');
         return this._components.map(function (v) { return v.val; }).join('');
     };
+    /**
+     * 指令转十六进制
+     */
     Instruction.prototype.toHex = function (zeroX) {
         if (zeroX === void 0) { zeroX = true; }
         return utils_1.binToHex(this.toBinary(), zeroX);
@@ -95,7 +108,9 @@ var Instruction = /** @class */ (function () {
     return Instruction;
 }());
 exports.Instruction = Instruction;
-// Minisys指令集
+/**
+ * Minisys指令集
+ */
 exports.MinisysInstructions = (function () {
     var _MinisysInstructions = [];
     // 新增指令
@@ -104,7 +119,7 @@ exports.MinisysInstructions = (function () {
             lBit: x[0],
             rBit: x[1],
             desc: x[2],
-            toBin: x[3],
+            toBinary: x[3],
             type: x[4],
             val: x[5],
         }); })));
@@ -118,7 +133,8 @@ exports.MinisysInstructions = (function () {
             return /^$/;
         }
         else {
-            return new RegExp('^' + '([\\w$-]+),'.repeat(num - 1) + '([\\w$-]+)$');
+            // prettier-ignore
+            return new RegExp('^' + Array(num).fill(String.raw(templateObject_1 || (templateObject_1 = __makeTemplateObject(["([w$-]+)"], ["([\\w$-]+)"])))).join(',') + '$');
         }
     }
     // =================== R型指令 ===================
@@ -508,3 +524,5 @@ exports.MinisysInstructions = (function () {
     newInstruction('nop', '空转指令', 'do nothing', paramPattern(0), [[31, 0, 'NOP', nop, 'fixed', '0'.repeat(32)]]);
     return _MinisysInstructions;
 })();
+var templateObject_1;
+//# sourceMappingURL=instruction.js.map

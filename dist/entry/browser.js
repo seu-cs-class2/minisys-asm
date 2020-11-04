@@ -1,32 +1,42 @@
 "use strict";
+/**
+ * Minisys汇编器 - 浏览器端编译入口
+ * by Withod, z0gSh1u @ 2020-10
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 var assembler_1 = require("../assembler");
 var convert_1 = require("../convert");
-var lastModifiedInfo = "";
-// @ts-ignore
-var editor = window.editor;
+var lastModifiedInfo = ''; // 页面提示语
 function $(selector) {
     return document.querySelector(selector);
 }
+// @ts-ignore
+var editor = window.editor;
+var statusBgDOM = $('.status');
+var statusDOM = $('#asm-status');
+var traceDOM = $('#asm-failTrace');
+var resultDOM = $('#asm-result');
+/**
+ * 修改提示状态
+ */
 function setStatus(to, trace) {
-    var statusBackDOM = $('.status');
-    var statusDOM = $('#asm-status');
-    var traceDOM = $('#asm-failTrace');
     var successColor = '#cf9';
     var failColor = '#f99';
     if (to === 'success') {
-        statusBackDOM.style.background = successColor;
+        statusBgDOM.style.background = successColor;
         statusDOM.innerText = '成功';
         traceDOM.innerText = '';
     }
-    else if (to === 'fail') {
-        statusBackDOM.style.background = failColor;
+    if (to === 'fail') {
+        statusBgDOM.style.background = failColor;
         statusDOM.innerText = '失败';
         traceDOM.innerText = trace || '';
     }
 }
+/**
+ * 网页端触发汇编
+ */
 function assembleBrowser() {
-    var resultDOM = $('#asm-result');
     var asmCode = editor.getValue();
     try {
         var result = assembler_1.assemble(asmCode);
@@ -36,25 +46,28 @@ function assembleBrowser() {
     }
     catch (ex) {
         setStatus('fail', ex);
-        console.log(ex);
+        console.error(ex);
         resultDOM.value = '';
     }
 }
+/**
+ * 形成文件供下载
+ */
 function downloadFile(content, filename) {
-    var eleLink = document.createElement('a');
-    eleLink.download = filename;
-    eleLink.style.display = 'none';
-    // 字符内容转变成blob地址
+    var linkDOM = document.createElement('a');
+    linkDOM.download = filename;
+    linkDOM.style.display = 'none';
+    // 字符内容转二进制大对象
     var blob = new Blob([content]);
-    eleLink.href = URL.createObjectURL(blob);
+    linkDOM.href = URL.createObjectURL(blob);
     // 触发点击
-    document.body.appendChild(eleLink);
-    eleLink.click();
-    // 然后移除
-    document.body.removeChild(eleLink);
+    document.body.appendChild(linkDOM);
+    linkDOM.click();
+    // 移除
+    document.body.removeChild(linkDOM);
 }
-;
 window.addEventListener('load', function () {
+    // 按钮处理逻辑
     $('#asm-assemble').onclick = assembleBrowser;
     $('#asm-download-coe').onclick = function () {
         try {
@@ -65,11 +78,22 @@ window.addEventListener('load', function () {
         }
         catch (ex) {
             setStatus('fail', ex);
-            console.log(ex);
+            console.error(ex);
         }
     };
     $('#asm-download-txt').onclick = function () {
-        alert('该功能暂未支持。');
+        try {
+            var result = assembler_1.assemble(editor.getValue());
+            var dataCoe = convert_1.dataSegToCoe(result.dataSeg);
+            var textCoe = convert_1.textSegToCoe(result.textSeg);
+            downloadFile(convert_1.coeToTxt(textCoe, dataCoe), 'serial.txt');
+            setStatus('success');
+        }
+        catch (ex) {
+            setStatus('fail', ex);
+            console.error(ex);
+        }
     };
     $('#asm-lastModified').innerHTML = lastModifiedInfo;
 });
+//# sourceMappingURL=browser.js.map
