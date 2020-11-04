@@ -1,36 +1,47 @@
+/**
+ * Minisys汇编器 - 浏览器端编译入口
+ * by Withod, z0gSh1u @ 2020-10
+ */
+
 /// <reference path="../typing/ace.d.ts" />
 import { Ace } from '../typing/ace'
 import { assemble } from '../assembler'
-import { dataSegToCoe, textSegToCoe } from '../convert'
+import { coeToTxt, dataSegToCoe, textSegToCoe } from '../convert'
 
-const lastModifiedInfo = ``
-
-// @ts-ignore
-const editor = window.editor as Ace.Editor
+const lastModifiedInfo = '' // 页面提示语
 
 function $<T>(selector: string): T {
   return (<unknown>document.querySelector(selector)) as T
 }
+// @ts-ignore
+const editor = window.editor as Ace.Editor
+const statusBgDOM = $<HTMLDivElement>('.status')
+const statusDOM = $<HTMLSpanElement>('#asm-status')
+const traceDOM = $<HTMLParagraphElement>('#asm-failTrace')
+const resultDOM = $<HTMLTextAreaElement>('#asm-result')
 
+/**
+ * 修改提示状态
+ */
 function setStatus(to: 'success' | 'fail', trace?: string) {
-  const statusBackDOM = $<HTMLDivElement>('.status')
-  const statusDOM = $<HTMLSpanElement>('#asm-status')
-  const traceDOM = $<HTMLParagraphElement>('#asm-failTrace')
   const successColor = '#cf9'
   const failColor = '#f99'
   if (to === 'success') {
-    statusBackDOM.style.background = successColor
+    statusBgDOM.style.background = successColor
     statusDOM.innerText = '成功'
     traceDOM.innerText = ''
-  } else if (to === 'fail') {
-    statusBackDOM.style.background = failColor
+  }
+  if (to === 'fail') {
+    statusBgDOM.style.background = failColor
     statusDOM.innerText = '失败'
     traceDOM.innerText = trace || ''
   }
 }
 
+/**
+ * 网页端触发汇编
+ */
 function assembleBrowser() {
-  const resultDOM = $<HTMLTextAreaElement>('#asm-result')
   const asmCode = editor.getValue()
   try {
     const result = assemble(asmCode)
@@ -39,26 +50,30 @@ function assembleBrowser() {
     setStatus('success')
   } catch (ex) {
     setStatus('fail', ex)
-    console.log(ex)
+    console.error(ex)
     resultDOM.value = ''
   }
 }
 
+/**
+ * 形成文件供下载
+ */
 function downloadFile(content: string, filename: string) {
-  var eleLink = document.createElement('a');
-  eleLink.download = filename;
-  eleLink.style.display = 'none';
-  // 字符内容转变成blob地址
-  var blob = new Blob([content]);
-  eleLink.href = URL.createObjectURL(blob);
+  const linkDOM = document.createElement('a')
+  linkDOM.download = filename
+  linkDOM.style.display = 'none'
+  // 字符内容转二进制大对象
+  const blob = new Blob([content])
+  linkDOM.href = URL.createObjectURL(blob)
   // 触发点击
-  document.body.appendChild(eleLink);
-  eleLink.click();
-  // 然后移除
-  document.body.removeChild(eleLink);
-};
+  document.body.appendChild(linkDOM)
+  linkDOM.click()
+  // 移除
+  document.body.removeChild(linkDOM)
+}
 
 window.addEventListener('load', () => {
+  // 按钮处理逻辑
   $<HTMLButtonElement>('#asm-assemble').onclick = assembleBrowser
   $<HTMLButtonElement>('#asm-download-coe').onclick = () => {
     try {
@@ -68,11 +83,20 @@ window.addEventListener('load', () => {
       setStatus('success')
     } catch (ex) {
       setStatus('fail', ex)
-      console.log(ex)
+      console.error(ex)
     }
   }
   $<HTMLButtonElement>('#asm-download-txt').onclick = () => {
-    alert('该功能暂未支持。')
+    try {
+      const result = assemble(editor.getValue())
+      const dataCoe = dataSegToCoe(result.dataSeg)
+      const textCoe = textSegToCoe(result.textSeg)
+      downloadFile(coeToTxt(textCoe, dataCoe), 'serial.txt')
+      setStatus('success')
+    } catch (ex) {
+      setStatus('fail', ex)
+      console.error(ex)
+    }
   }
   $<HTMLSpanElement>('#asm-lastModified').innerHTML = lastModifiedInfo
 })

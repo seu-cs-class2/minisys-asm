@@ -1,9 +1,9 @@
 /**
  * Minisys寄存器定义
- * by z0gSh1u @ 2020-10
+ * by Withod, z0gSh1u @ 2020-10
  */
 
-import { decToBin } from './utils'
+import { assert, decToBin } from './utils'
 
 // prettier-ignore
 const registerNames = [
@@ -18,19 +18,18 @@ const registerNames = [
 ]
 
 /**
- * 返回寄存器对应的二进制号（5位）
- * @example reg: $1 1 sp $sp
+ * 返回寄存器对应的五位二进制号
+ * @example $1 1 sp $sp
+ * @warn 请勿在本函数内覆盖RegExp.$x // FIXME
  */
 export function regToBin(reg: string) {
   reg = reg.replace('$', '').trim()
   let regNumber
-  if (reg.split('').every(x => { return '0123456789'.includes(x) })) {
+  if (reg.split('').every(x => '0123456789'.includes(x))) {
     regNumber = Number(reg)
   } else {
     regNumber = registerNames.indexOf(reg)
   }
-  if (regNumber > 31 || regNumber < 0) {
-    throw new Error(`无效的寄存器: ${reg}`)
-  }
+  assert(regNumber >= 0 && regNumber <= 31, `无效的寄存器: ${reg}`)
   return decToBin(regNumber, 5)
 }

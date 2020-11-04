@@ -1,3 +1,7 @@
+/**
+ * 仅调试用
+ */
+
 import fs from 'fs'
 import { assemble } from './assembler'
 
@@ -18,4 +22,5 @@ start:  addi  $t0, $zero, 0
 `
 
 const res = assemble(asm)
-fs.writeFileSync('./res.json', JSON.stringify(res, null, 2))
+console.log(res)
+// fs.writeFileSync('./res.json', JSON.stringify(res, null, 2))

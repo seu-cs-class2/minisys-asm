@@ -1,6 +1,6 @@
 /**
  * Minisys指令定义
- * by z0gSh1u @ 2020-10
+ * by Withod, z0gSh1u @ 2020-10
  */
 
 import { regToBin } from './register'
@@ -15,7 +15,9 @@ const nop = function () {}
  */
 type InstructionComponentType = 'fixed' | 'reg' | 'immed' | 'c0sel' | 'offset' | 'addr' | 'shamt' | 'code'
 
-// 指令组分
+/**
+ * 指令组分
+ */
 export interface InstructionComponent {
   // bit范围定义，lBit > rBit，0~31，闭区间
   lBit: number
@@ -23,14 +25,16 @@ export interface InstructionComponent {
   // 参数描述
   desc: string
   // 参数计算方式
-  toBin: Function
+  toBinary: Function
   // 参数类型
   type: InstructionComponentType
   // 参数值，为空串表示可变，否则表示固定或已填写
   val: string
 }
 
-// 指令类
+/**
+ * 指令类
+ */
 export class Instruction {
   private _symbol: string // 指令名称（助记符）
   private _desc: string // 指令描述
@@ -42,7 +46,7 @@ export class Instruction {
     return new Instruction(baseOn.symbol, baseOn.desc, baseOn.pseudo, baseOn.insPattern, baseOn.components)
   }
 
-  get symbol(): string {
+  get symbol() {
     return this._symbol
   }
 
@@ -50,7 +54,7 @@ export class Instruction {
     this._symbol = symbol
   }
 
-  get desc(): string {
+  get desc() {
     return this._desc
   }
 
@@ -58,7 +62,7 @@ export class Instruction {
     this._desc = desc
   }
 
-  get pseudo(): string {
+  get pseudo() {
     return this._pseudo
   }
 
@@ -66,7 +70,7 @@ export class Instruction {
     this._pseudo = pseudo
   }
 
-  get insPattern(): RegExp {
+  get insPattern() {
     return this._insPattern
   }
 
@@ -87,35 +91,44 @@ export class Instruction {
     this._desc = desc
     this._pseudo = pseudo
     this._insPattern = insPattern
-    this._components = components.concat().map(x => ({
+    this._components = components.map(x => ({
       lBit: x.lBit,
       rBit: x.rBit,
       desc: x.desc,
-      toBin: x.toBin,
+      toBinary: x.toBinary,
       type: x.type,
       val: x.val,
     })) as InstructionComponent[]
   }
 
+  /**
+   * 设置指令组分
+   */
   setComponent(desc: string, val: string) {
     const index = this._components.findIndex(v => v.desc == desc)
     assert(index !== -1, `未知的指令组分: ${desc}`)
     this._components[index].val = val
   }
 
+  /**
+   * 指令转二进制
+   */
   toBinary() {
-    if (this._components.some(v => !v.val.trim())) {
-      throw new Error('尝试将不完整的指令转为2或16进制。')
-    }
+    assert(!this._components.some(v => !v.val.trim()), '尝试将不完整的指令转为2或16进制。')
     return this._components.map(v => v.val).join('')
   }
 
+  /**
+   * 指令转十六进制
+   */
   toHex(zeroX = true) {
     return binToHex(this.toBinary(), zeroX)
   }
 }
 
-// Minisys指令集
+/**
+ * Minisys指令集
+ */
 export const MinisysInstructions: Instruction[] = (function () {
   const _MinisysInstructions: Instruction[] = []
 
@@ -137,7 +150,7 @@ export const MinisysInstructions: Instruction[] = (function () {
           lBit: x[0],
           rBit: x[1],
           desc: x[2],
-          toBin: x[3],
+          toBinary: x[3],
           type: x[4],
           val: x[5],
         })) as InstructionComponent[]
@@ -153,7 +166,8 @@ export const MinisysInstructions: Instruction[] = (function () {
     if (num < 1) {
       return /^$/
     } else {
-      return new RegExp('^' + '([\\w$-]+),'.repeat(num - 1) + '([\\w$-]+)$')
+      // prettier-ignore
+      return new RegExp('^' + Array(num).fill(String.raw`([\w$-]+)`).join(',') + '$')
     }
   }
 

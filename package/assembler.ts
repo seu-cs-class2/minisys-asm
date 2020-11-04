@@ -1,55 +1,63 @@
 /**
- * Minisys汇编解析器
- * by z0gSh1u @ 2020-10
+ * Minisys汇编器 - 汇编代码解析
+ * by Withod, z0gSh1u @ 2020-10
+ * // TODO: 支持宏指令
  */
 
-import { maxHeaderSize } from 'http'
 import { Instruction, MinisysInstructions } from './instruction'
 import { assert, getOffset, getOffsetAddr, serialString, sizeof } from './utils'
 
 type HexAddr = string
-type VarCompType = 'byte' | 'half' | 'word' | 'ascii' | 'space'
+// 仿照如下形式来添加新的变量类型
+// prettier-ignore
+const __VarCompType = {
+  byte: void 0, half: void 0, word: void 0, ascii: void 0, space: void 0
+}
+export type VarCompType = keyof typeof __VarCompType
+const VarCompTypeRegex = Object.keys(__VarCompType).join('|')
 
+/**
+ * 汇编程序，由数据段和代码段构成
+ */
 interface AsmProgram {
   dataSeg: DataSeg
   textSeg: TextSeg
 }
 
 /**
- * DataSeg:
- *    .data 0x0000
- *    buf: .word 10
- *    ...
- * DataSegVar:
- *    buf: .word 10
- *         .byte 8, 10, 15
- * DataSegVarComp:
- *         .word 10
- *         .byte 8
- *         .byte 10
- *         ...
+ * 变量组分，由类型和值组成
+ * @example `.word 10`
  */
-
 interface DataSegVarComp {
-  type: VarCompType
-  val: string
+  type: VarCompType // 组分类型
+  val: string // 组分值
 }
 
+/**
+ * 变量，由一系列组分构成
+ * @example
+ * `DataSegVar:
+ *    buf: .word 10
+ *         .byte 8, 10, 15`
+ */
 interface DataSegVar {
-  name: string
-  comps: DataSegVarComp[]
-  addr: number
+  name: string // 变量名
+  comps: DataSegVarComp[] // 组成成分
+  addr: number // 变量地址
 }
 
+/**
+ * 数据段
+ */
 export class DataSeg {
-  private _startAddr: HexAddr
-  private _vars: DataSegVar[]
+  private _startAddr: HexAddr // 起始地址
+  private _vars: DataSegVar[] // 变量
 
-  get startAddr(): HexAddr {
+  get startAddr() {
     return this._startAddr
   }
 
-  get vars(): DataSegVar[] {
+  get vars() {
     return this._vars
   }
 
@@ -58,6 +66,9 @@ export class DataSeg {
     this._vars = Array.from(vars)
   }
 
+  /**
+   * 添加新变量
+   */
   newVar(name: string, comps: DataSegVarComp[], addr: number) {
     assert(
       this._vars.every(v => v.name !== name),
@@ -65,11 +76,14 @@ export class DataSeg {
     )
     this._vars.push({
       name,
-      comps: [...comps],
+      comps,
       addr,
     })
   }
 
+  /**
+   * 添加新变量组分
+   */
   newComp(name: string, comp: DataSegVarComp) {
     assert(
       this._vars.some(v => v.name === name),
@@ -80,25 +94,21 @@ export class DataSeg {
 }
 
 /**
- * TextSeg:
- *    .text 0x0000
- *    addi $v0, $0, 10
- *    ...
- * TextSegIns:
- *    start: addi $v0, $0, 10
- *    ^^^^^label
+ * 代码段标签
  */
-
 interface TextSegLabel {
-  name: string
-  lineno: number
-  addr: number
+  name: string // 标签名
+  lineno: number // 标签行号
+  addr: number // 标签地址
 }
 
+/**
+ * 代码段
+ */
 export class TextSeg {
-  private _startAddr: string
-  private _ins: Instruction[]
-  private _labels: TextSegLabel[]
+  private _startAddr: string // 开始抵制
+  private _ins: Instruction[] // 指令
+  private _labels: TextSegLabel[] // 标签
 
   get startAddr() {
     return this._startAddr
@@ -118,37 +128,40 @@ export class TextSeg {
     this._labels = Array.from(labels)
   }
 
-  toBinary() {
-    let res = ''
-    this._ins.forEach(ins => {
-      res += ins.toBinary() + '\n'
-    })
-    return res
+  /**
+   * 代码段二进制输出
+   */
+  toBinary(): string {
+    return this._ins.map(v => v.toBinary()).join('\n')
   }
 }
 
+// 分析过程辅助变量
 let vars: DataSegVar[] = []
 let labels: TextSegLabel[] = []
 let pc = 0
 
+/**
+ * 获取变量地址
+ */
 export function getVarAddr(name: string) {
-  let res = vars.find(v => { return v.name == name })
-  if (res === undefined) {
-    throw new Error(`未知的变量：${name}`)
-  } else {
-    return res.addr
-  }
+  const res = vars.find(v => v.name == name)
+  assert(res, `未知的变量：${name}`)
+  return res!.addr
 }
 
+/**
+ * 获取标签地址
+ */
 export function getLabelAddr(label: string) {
-  let res = labels.find(l => { return l.name == label })
-  if (res === undefined) {
-    throw new Error(`未知的label：${label}`)
-  } else {
-    return res.addr
-  }
+  const res = labels.find(v => v.name == label)
+  assert(res, `未知的标签：${label}`)
+  return res!.addr
 }
 
+/**
+ * 获取PC地址
+ */
 export function getPC() {
   return pc
 }
@@ -159,28 +172,34 @@ export function getPC() {
  */
 function parseDataSeg(asm: string[]) {
   // 解析初始化值
+  // FIXME: ASCII转义、引号内带逗号处理
   const parseInitValue = (init: string) => init.split(/\s*,/).map(v => v.trim())
 
+  // 检查起始地址
   const startAddr = asm[0].split(/\s+/)[1] || '0'
   assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。')
 
-  const VarStartPattern = /(.+):\s+\.(word|byte|half|ascii|space)\s+(.+)/
-  const VarContdPattern = /\.(word|byte|half|ascii|space)\s+(.+)/
+  // 变量声明开始正则
+  const VarStartPattern = new RegExp(String.raw`(.+):\s+\.(${VarCompTypeRegex})\s+(.+)`)
+  // 变量声明继续正则
+  const VarContdPattern = new RegExp(String.raw`\.(${VarCompTypeRegex})\s+(.+)`)
+
   let comps: DataSegVarComp[] = [],
-    name
+    name: string | undefined
   let i = 1
   let addr = Number(startAddr),
     nextAddr = addr
   vars = []
 
+  // 开始扫描
   do {
     if (VarStartPattern.test(asm[i])) {
       // 一个新变量开始
       if (name !== void 0) {
         vars.push({
-          name: name,
-          comps: comps,
-          addr: addr
+          name,
+          comps,
+          addr,
         })
         comps = []
         name = void 0
@@ -188,43 +207,50 @@ function parseDataSeg(asm: string[]) {
       }
       name = RegExp.$1
       const type = RegExp.$2 as VarCompType
-      const size = sizeof(type as string)
+      const size = sizeof(type)
+      // 边界对齐
       if (addr % size > 0) {
-        nextAddr = addr = addr + size - addr % size
+        nextAddr = addr = addr + size - (addr % size)
       }
+      // 推入组分记录
       parseInitValue(RegExp.$3).forEach(val => {
         comps.push({
           type,
           val,
         })
-        nextAddr += size * (type == 'ascii' ? val.length : 1)
+        // TODO: 确保val.length正确
+        nextAddr += size * (type === 'ascii' ? val.length : 1)
       })
     } else if (VarContdPattern.test(asm[i])) {
       // 变量组分继续
       const type = RegExp.$1 as VarCompType
-      const size = sizeof(type as string)
+      const size = sizeof(type)
+      // 边界对齐，自动补.space
       while (nextAddr % size > 0) {
         comps.push({
           type: 'space',
-          val: '00'
+          val: '00', // 其实写啥都行
         })
         nextAddr++
       }
+      // 推入组分记录
       parseInitValue(RegExp.$2).forEach(val => {
         comps.push({
           type,
           val,
         })
-        nextAddr += size * (type == 'ascii' ? val.length : 1)
+        nextAddr += size * (type === 'ascii' ? val.length : 1)
       })
     } else {
-      assert(false, `未知的变量定义形式，数据段行号: ${i + 1}`)
+      // 报错
+      assert(false, `未知的变量定义形式，在数据段第 ${i + 1} 行`)
     }
+    // 末尾处理
     if (i === asm.length - 1) {
       vars.push({
-        name: name as string,
-        comps: comps,
-        addr: addr,
+        name: name!,
+        comps,
+        addr,
       })
     }
     i++
@@ -239,32 +265,70 @@ function parseDataSeg(asm: string[]) {
  */
 function parseTextSeg(asm_: string[]) {
   let asm = Array.from(asm_)
+
+  // 确定数据段起始地址
   let startAddr = asm[0].split(/\s+/)[1] || '0'
   assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。')
-  startAddr = ((4 - Number(startAddr) % 4) % 4 + Number(startAddr)).toString()
+  // 起始地址校正到4字节对齐（32位）
+  const sizeofWord = sizeof('word')
+  const startAddrNumber = Number(startAddr)
+  startAddr = String(((sizeofWord - (startAddrNumber % sizeofWord)) % sizeofWord) + startAddrNumber)
+  // pc指针
+  pc = getOffsetAddr(startAddr, 0)
+  labels = []
 
   // 先提取掉所有的label
-  labels = []
-  pc = getOffsetAddr(startAddr, 0)
   asm = asm.map((v, i) => {
     if (i === 0) return v
     if (/(\w+):\s*(.+)/.test(v)) {
       assert(
         labels.every(label => label.name !== RegExp.$1),
-        `存在重复的label: ${RegExp.$1}`
+        `存在重复的label：${RegExp.$1}`
       )
-      labels.push({ name: RegExp.$1, lineno: i, addr: getOffsetAddr(startAddr, getOffset({ instruction: i - 1 })) })
+      labels.push({ name: RegExp.$1, lineno: i, addr: getOffsetAddr(startAddr, getOffset({ ins: i - 1 })) })
       return RegExp.$2
     }
     return v
   })
 
-  let ins: Instruction[] = []
+  const ins: Instruction[] = []
   asm.forEach((v, i) => {
-    i !== 0 && ins.push(parseOneLine(v, labels, i))
+    i !== 0 && ins.push(parseOneLine(v, i))
   })
 
   return new TextSeg(startAddr, ins, labels)
+}
+
+/**
+ * 解析单行汇编到Instruction对象
+ */
+export function parseOneLine(asm: string, lineno: number) {
+  // 处理助记符
+  assert(/^\s*(\w+)\s+(.*)/.test(asm), `没有找到指令助记符，在代码段第 ${lineno} 行。`)
+  const symbol = RegExp.$1
+  // 检验助记符合法性
+  const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
+  assert(instructionIndex !== -1, `没有找到指令助记符：${symbol}，在代码段第 ${lineno} 行。`)
+  // 单行汇编去空格
+  asm = serialString(RegExp.$2)
+  // pc移进
+  pc += sizeof('ins')
+
+  // 开始组装Instruction对象
+  let res = Instruction.newInstance(MinisysInstructions[instructionIndex])
+  assert(res.insPattern.test(asm), `代码段第 ${lineno} 行指令参数不匹配：${asm}`)
+  res.components.forEach(component => {
+    if (!component.val.trim() /* 代表是需要填充的变量，而不是指令二进制中的定值 */) {
+      try {
+        res.setComponent(component.desc, component.toBinary())
+      } catch (err) {
+        err.message += `，在代码段第 ${lineno} 行`
+        throw err
+      }
+    }
+  })
+
+  return res
 }
 
 /**
@@ -272,7 +336,8 @@ function parseTextSeg(asm_: string[]) {
  * @param asm_ 汇编代码
  */
 export function assemble(asm_: string) {
-  // 格式化之。去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格
+  // 格式化之：去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格，均小写。
+  // TODO: 是否能实现报错行号与实际情况严格对应？（此处去除了空行，实际上不对应）
   const asm = asm_
     .replace(/\r\n/g, '\n')
     .replace(/#(.*)\n/g, '\n')
@@ -281,6 +346,7 @@ export function assemble(asm_: string) {
     .filter(x => x.trim())
     .map(x => x.trim().replace(/\s+/g, ' ').replace(/,\s*/, ', ').toLowerCase())
 
+  // 挑出代码段和数据段
   const dataSegStartLine = asm.findIndex(v => v.match(/\.data/))
   const textSegStartLine = asm.findIndex(v => v.match(/\.text/))
   assert(dataSegStartLine !== -1, '未找到数据段开始。')
@@ -296,32 +362,4 @@ export function assemble(asm_: string) {
     dataSeg,
     textSeg,
   } as AsmProgram
-}
-
-/**
- * 解析单行汇编到Instruction对象
- */
-export function parseOneLine(asm: string, labels: TextSegLabel[], lineno: number) {
-  // 处理助记符
-  assert(/^\s*(\w+)\s+(.*)/.test(asm), `没有找到指令助记符，在第 ${lineno} 行。`)
-  const symbol = RegExp.$1
-  asm = serialString(RegExp.$2)
-  pc += sizeof('ins')
-  const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
-  assert(instructionIndex !== -1, `没有找到指令助记符：${symbol}，在第 ${lineno} 行。`)
-
-  let res = Instruction.newInstance(MinisysInstructions[instructionIndex])
-
-  assert(res.insPattern.test(asm), `第 ${lineno} 行指令参数不匹配：${asm}`)
-  res.components.forEach(component => {
-    if (!component.val.trim()) {
-      try {
-        res.setComponent(component.desc, component.toBin())
-      } catch (err) {
-        throw new Error(err.message + `，在第 ${lineno}行`)
-      }
-    }
-  })
-
-  return res
 }
