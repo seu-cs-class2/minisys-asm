@@ -239,8 +239,9 @@ function parseDataSeg(asm: string[]) {
  */
 function parseTextSeg(asm_: string[]) {
   let asm = Array.from(asm_)
-  const startAddr = asm[0].split(/\s+/)[1] || '0'
+  let startAddr = asm[0].split(/\s+/)[1] || '0'
   assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。')
+  startAddr = ((4 - Number(startAddr) % 4) % 4 + Number(startAddr)).toString()
 
   // 先提取掉所有的label
   labels = []
@@ -252,7 +253,6 @@ function parseTextSeg(asm_: string[]) {
         labels.every(label => label.name !== RegExp.$1),
         `存在重复的label: ${RegExp.$1}`
       )
-      // FIXME: 地址4字节对齐？
       labels.push({ name: RegExp.$1, lineno: i, addr: getOffsetAddr(startAddr, getOffset({ instruction: i - 1 })) })
       return RegExp.$2
     }

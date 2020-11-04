@@ -2,7 +2,7 @@
 buf: .WORD 0x000000ff, 0x55005500
 buf2: .byte 1
       .ascii "hello"
-.TEXT 0x123456
+.TEXT 
 start:  addi  $t0, $zero, 0
         lw    $v0, 20($t0)
         addi  $t0, $t0, 4

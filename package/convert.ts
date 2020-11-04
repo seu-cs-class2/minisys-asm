@@ -53,8 +53,23 @@ export function dataSegToCoe(dataSeg: DataSeg, padTo = 64) {
 }
 
 export function textSegToCoe(textSeg: TextSeg, padTo = 64) {
-  // TODO:
-  return
+  let coe = 'memory_initialization_radix = 16;\nmemory_initialization_vector =\n'
+  const lineLimit = padTo * 1024 / 4
+  const startLine = Number(textSeg.startAddr) / 4
+  let lineno = 0
+
+  coe += '00000000,\n'.repeat(startLine)
+  textSeg.ins.forEach(ins => {
+    assert(lineno + startLine < lineLimit, `第${lineno}条指令${ins.symbol}地址超出限制`)
+    let buf = ''
+    ins.components.forEach(comp => {
+      buf += comp.val
+    })
+    coe += binToHex(buf, false) + ',\n'
+    lineno++
+  })
+  coe += '00000000,\n'.repeat(lineLimit - lineno - startLine)
+  return coe.slice(0, -2) + ';\n'
 }
 
 /**

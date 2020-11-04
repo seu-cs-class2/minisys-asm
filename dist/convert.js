@@ -54,8 +54,22 @@ function dataSegToCoe(dataSeg, padTo) {
 exports.dataSegToCoe = dataSegToCoe;
 function textSegToCoe(textSeg, padTo) {
     if (padTo === void 0) { padTo = 64; }
-    // TODO:
-    return;
+    var coe = 'memory_initialization_radix = 16;\nmemory_initialization_vector =\n';
+    var lineLimit = padTo * 1024 / 4;
+    var startLine = Number(textSeg.startAddr) / 4;
+    var lineno = 0;
+    coe += '00000000,\n'.repeat(startLine);
+    textSeg.ins.forEach(function (ins) {
+        utils_1.assert(lineno + startLine < lineLimit, "\u7B2C" + lineno + "\u6761\u6307\u4EE4" + ins.symbol + "\u5730\u5740\u8D85\u51FA\u9650\u5236");
+        var buf = '';
+        ins.components.forEach(function (comp) {
+            buf += comp.val;
+        });
+        coe += utils_1.binToHex(buf, false) + ',\n';
+        lineno++;
+    });
+    coe += '00000000,\n'.repeat(lineLimit - lineno - startLine);
+    return coe.slice(0, -2) + ';\n';
 }
 exports.textSegToCoe = textSegToCoe;
 /**

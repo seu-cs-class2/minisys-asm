@@ -60,6 +60,8 @@ window.addEventListener('load', function () {
         try {
             var result = assembler_1.assemble(editor.getValue());
             downloadFile(convert_1.dataSegToCoe(result.dataSeg), 'dmem32.coe');
+            downloadFile(convert_1.textSegToCoe(result.textSeg), 'prgmip32.coe');
+            setStatus('success');
         }
         catch (ex) {
             setStatus('fail', ex);

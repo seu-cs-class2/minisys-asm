@@ -198,6 +198,7 @@ function parseTextSeg(asm_) {
     var asm = Array.from(asm_);
     var startAddr = asm[0].split(/\s+/)[1] || '0';
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
+    startAddr = ((4 - Number(startAddr) % 4) % 4 + Number(startAddr)).toString();
     // 先提取掉所有的label
     labels = [];
     pc = utils_1.getOffsetAddr(startAddr, 0);
@@ -206,7 +207,6 @@ function parseTextSeg(asm_) {
             return v;
         if (/(\w+):\s*(.+)/.test(v)) {
             utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label: " + RegExp.$1);
-            // FIXME: 地址4字节对齐？
             labels.push({ name: RegExp.$1, lineno: i, addr: utils_1.getOffsetAddr(startAddr, utils_1.getOffset({ instruction: i - 1 })) });
             return RegExp.$2;
         }

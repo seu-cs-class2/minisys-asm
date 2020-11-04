@@ -1,7 +1,7 @@
 /// <reference path="../typing/ace.d.ts" />
 import { Ace } from '../typing/ace'
 import { assemble } from '../assembler'
-import { dataSegToCoe } from '../convert'
+import { dataSegToCoe, textSegToCoe } from '../convert'
 
 const lastModifiedInfo = ``
 
@@ -64,6 +64,8 @@ window.addEventListener('load', () => {
     try {
       const result = assemble(editor.getValue())
       downloadFile(dataSegToCoe(result.dataSeg), 'dmem32.coe')
+      downloadFile(textSegToCoe(result.textSeg), 'prgmip32.coe')
+      setStatus('success')
     } catch (ex) {
       setStatus('fail', ex)
       console.log(ex)
