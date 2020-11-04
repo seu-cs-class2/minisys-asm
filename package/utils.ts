@@ -1,9 +1,40 @@
+import { getLabelAddr, getPC, getVarAddr } from "./assembler"
+
 /**
  * Ensure `ensure`, else throw `Error(hint)`.
  */
 export function assert(ensure: unknown, hint?: string) {
   if (!ensure) {
     throw new Error(hint)
+  }
+}
+
+/**
+ * 将label或字面量转换为二进制
+ * @param label label名称或字面量数字
+ * @param len 转换后的长度
+ * @param isOffset 转换而成的是否为相对当前地址的偏移量
+ * @param isSignExtend 转换后位数不足时是否进行符号扩展，默认采用零扩展
+ */
+export function labelToBin(label: string, len: number, isOffset: boolean, isSignExtend: boolean = false) {
+  try {
+    return literalToBin(label, len, isSignExtend).slice(-len)
+  } catch (e) {
+    return literalToBin((getLabelAddr(label) - (isOffset ? getPC() : 0)).toString(), len, isOffset).slice(-len)
+  }
+}
+
+/**
+ * 将变量名或字面量转换为二进制
+ * @param name 变量名称或字面量数字
+ * @param len 转换后的长度
+ * @param isSignExtend 转换后位数不足时是否进行符号扩展，默认采用零扩展
+ */
+export function varToAddrBin(name: string, len: number, isSignExtend: boolean = false) {
+  try {
+    return literalToBin(name, len, isSignExtend).slice(-len)
+  } catch(e) {
+    return literalToBin(getVarAddr(name).toString(), len).slice(-len)
   }
 }
 
@@ -19,7 +50,7 @@ export function literalToBin(literal: string, len: number, isSignExtend: boolean
   assert(!isNaN(Number(literal)), `错误的参数：${literal}`)
   if (literal.startsWith('0x')) {
     let num = hexToBin(literal)
-    return num.padStart(len, isSignExtend ? num[0] : '0')
+    return num.padStart(len, isSignExtend && parseInt(literal, 16) < 0 ? '1' : '0')
   } else {
     return decToBin(parseInt(literal), len, isSignExtend)
   }
@@ -31,11 +62,11 @@ export function literalToBin(literal: string, len: number, isSignExtend: boolean
 export function decToBin(dec: number, len: number, isSignExtend: boolean = false) {
   let num: string = ''
   if (dec < 0) {
-    num = '1' + (-dec - 1).toString(2).split('').map(v => { return String.fromCharCode(v.charCodeAt(0) ^ 1) }).join('')
+    num = (-dec - 1).toString(2).split('').map(v => { return String.fromCharCode(v.charCodeAt(0) ^ 1) }).join('')
   } else {
-    num = '0' + dec.toString(2)
+    num = dec.toString(2)
   }
-  return num.padStart(len, isSignExtend ? num[0] : '0')
+  return num.padStart(len, isSignExtend && dec < 0 ? '1' : '0')
 }
 
 /**
@@ -90,6 +121,29 @@ export function hexToBin(hex: string) {
  */
 export function serialString(bin: string) {
   return bin.replace(/\s+/g, '')
+}
+
+/**
+ * 获取变量占用的字节数
+ * @param type 变量类型名
+ */
+export function sizeof(type: string) {
+  switch(type.toLowerCase()) {
+    case 'byte':
+      return 1
+    case 'half':
+      return 2
+    case 'word':
+      return 4
+    case 'space':
+      return 1
+    case 'ascii':
+      return 1
+    case 'ins':
+      return 4
+    default:
+      throw new Error(`错误的变量类型：${type}`)
+  }
 }
 
 /**
