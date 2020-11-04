@@ -169,8 +169,8 @@ function parseDataSeg(asm: string[]) {
   let comps: DataSegVarComp[] = [],
     name
   let i = 1
-  let addr = 0,
-    nextAddr = 0
+  let addr = Number(startAddr),
+    nextAddr = addr
   vars = []
 
   do {
@@ -180,7 +180,7 @@ function parseDataSeg(asm: string[]) {
         vars.push({
           name: name,
           comps: comps,
-          addr: getOffsetAddr(startAddr, addr)
+          addr: addr
         })
         comps = []
         name = void 0
@@ -197,21 +197,25 @@ function parseDataSeg(asm: string[]) {
           type,
           val,
         })
-        nextAddr += size
+        nextAddr += size * (type == 'ascii' ? val.length : 1)
       })
     } else if (VarContdPattern.test(asm[i])) {
       // 变量组分继续
       const type = RegExp.$1 as VarCompType
       const size = sizeof(type as string)
-      if (nextAddr % size > 0) {
-        nextAddr = nextAddr + size - nextAddr % size
+      while (nextAddr % size > 0) {
+        comps.push({
+          type: 'space',
+          val: '00'
+        })
+        nextAddr++
       }
       parseInitValue(RegExp.$2).forEach(val => {
         comps.push({
           type,
           val,
         })
-        nextAddr += size
+        nextAddr += size * (type == 'ascii' ? val.length : 1)
       })
     } else {
       assert(false, `未知的变量定义形式，数据段行号: ${i + 1}`)
@@ -220,7 +224,7 @@ function parseDataSeg(asm: string[]) {
       vars.push({
         name: name as string,
         comps: comps,
-        addr: getOffsetAddr(startAddr, addr),
+        addr: addr,
       })
     }
     i++

@@ -50,7 +50,7 @@ export function literalToBin(literal: string, len: number, isSignExtend: boolean
   assert(!isNaN(Number(literal)), `错误的参数：${literal}`)
   if (literal.startsWith('0x')) {
     let num = hexToBin(literal)
-    return num.padStart(len, isSignExtend ? num[0] : '0')
+    return num.padStart(len, isSignExtend && parseInt(literal, 16) < 0 ? '1' : '0')
   } else {
     return decToBin(parseInt(literal), len, isSignExtend)
   }
@@ -62,11 +62,11 @@ export function literalToBin(literal: string, len: number, isSignExtend: boolean
 export function decToBin(dec: number, len: number, isSignExtend: boolean = false) {
   let num: string = ''
   if (dec < 0) {
-    num = '1' + (-dec - 1).toString(2).split('').map(v => { return String.fromCharCode(v.charCodeAt(0) ^ 1) }).join('')
+    num = (-dec - 1).toString(2).split('').map(v => { return String.fromCharCode(v.charCodeAt(0) ^ 1) }).join('')
   } else {
-    num = '0' + dec.toString(2)
+    num = dec.toString(2)
   }
-  return num.padStart(len, isSignExtend ? num[0] : '0')
+  return num.padStart(len, isSignExtend && dec < 0 ? '1' : '0')
 }
 
 /**

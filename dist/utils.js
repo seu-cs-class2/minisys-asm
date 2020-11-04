@@ -57,7 +57,7 @@ function literalToBin(literal, len, isSignExtend) {
     assert(!isNaN(Number(literal)), "\u9519\u8BEF\u7684\u53C2\u6570\uFF1A" + literal);
     if (literal.startsWith('0x')) {
         var num = hexToBin(literal);
-        return num.padStart(len, isSignExtend ? num[0] : '0');
+        return num.padStart(len, isSignExtend && parseInt(literal, 16) < 0 ? '1' : '0');
     }
     else {
         return decToBin(parseInt(literal), len, isSignExtend);
@@ -71,12 +71,12 @@ function decToBin(dec, len, isSignExtend) {
     if (isSignExtend === void 0) { isSignExtend = false; }
     var num = '';
     if (dec < 0) {
-        num = '1' + (-dec - 1).toString(2).split('').map(function (v) { return String.fromCharCode(v.charCodeAt(0) ^ 1); }).join('');
+        num = (-dec - 1).toString(2).split('').map(function (v) { return String.fromCharCode(v.charCodeAt(0) ^ 1); }).join('');
     }
     else {
-        num = '0' + dec.toString(2);
+        num = dec.toString(2);
     }
-    return num.padStart(len, isSignExtend ? num[0] : '0');
+    return num.padStart(len, isSignExtend && dec < 0 ? '1' : '0');
 }
 exports.decToBin = decToBin;
 /**

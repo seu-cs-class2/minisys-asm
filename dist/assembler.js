@@ -125,7 +125,7 @@ function parseDataSeg(asm) {
     var VarContdPattern = /\.(word|byte|half|ascii|space)\s+(.+)/;
     var comps = [], name;
     var i = 1;
-    var addr = 0, nextAddr = 0;
+    var addr = Number(startAddr), nextAddr = addr;
     vars = [];
     var _loop_1 = function () {
         if (VarStartPattern.test(asm[i])) {
@@ -134,7 +134,7 @@ function parseDataSeg(asm) {
                 vars.push({
                     name: name,
                     comps: comps,
-                    addr: utils_1.getOffsetAddr(startAddr, addr)
+                    addr: addr
                 });
                 comps = [];
                 name = void 0;
@@ -151,22 +151,26 @@ function parseDataSeg(asm) {
                     type: type_1,
                     val: val,
                 });
-                nextAddr += size_1;
+                nextAddr += size_1 * (type_1 == 'ascii' ? val.length : 1);
             });
         }
         else if (VarContdPattern.test(asm[i])) {
             // 变量组分继续
             var type_2 = RegExp.$1;
             var size_2 = utils_1.sizeof(type_2);
-            if (nextAddr % size_2 > 0) {
-                nextAddr = nextAddr + size_2 - nextAddr % size_2;
+            while (nextAddr % size_2 > 0) {
+                comps.push({
+                    type: 'space',
+                    val: '00'
+                });
+                nextAddr++;
             }
             parseInitValue(RegExp.$2).forEach(function (val) {
                 comps.push({
                     type: type_2,
                     val: val,
                 });
-                nextAddr += size_2;
+                nextAddr += size_2 * (type_2 == 'ascii' ? val.length : 1);
             });
         }
         else {
@@ -176,7 +180,7 @@ function parseDataSeg(asm) {
             vars.push({
                 name: name,
                 comps: comps,
-                addr: utils_1.getOffsetAddr(startAddr, addr),
+                addr: addr,
             });
         }
         i++;

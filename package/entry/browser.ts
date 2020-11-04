@@ -1,6 +1,7 @@
 /// <reference path="../typing/ace.d.ts" />
 import { Ace } from '../typing/ace'
 import { assemble } from '../assembler'
+import { dataSegToCoe } from '../convert'
 
 const lastModifiedInfo = ``
 
@@ -43,10 +44,30 @@ function assembleBrowser() {
   }
 }
 
+function downloadFile(content: string, filename: string) {
+  var eleLink = document.createElement('a');
+  eleLink.download = filename;
+  eleLink.style.display = 'none';
+  // 字符内容转变成blob地址
+  var blob = new Blob([content]);
+  eleLink.href = URL.createObjectURL(blob);
+  // 触发点击
+  document.body.appendChild(eleLink);
+  eleLink.click();
+  // 然后移除
+  document.body.removeChild(eleLink);
+};
+
 window.addEventListener('load', () => {
   $<HTMLButtonElement>('#asm-assemble').onclick = assembleBrowser
   $<HTMLButtonElement>('#asm-download-coe').onclick = () => {
-    alert('该功能暂未支持。')
+    try {
+      const result = assemble(editor.getValue())
+      downloadFile(dataSegToCoe(result.dataSeg), 'dmem32.coe')
+    } catch (ex) {
+      setStatus('fail', ex)
+      console.log(ex)
+    }
   }
   $<HTMLButtonElement>('#asm-download-txt').onclick = () => {
     alert('该功能暂未支持。')
