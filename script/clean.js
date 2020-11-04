@@ -1,3 +1,7 @@
+/**
+ * 清理以准备构建
+ */
+
 'use strict'
 
 const fs = require('fs')
@@ -5,12 +9,18 @@ const path = require('path')
 
 const DIST_PATH = path.join(__dirname, '../dist')
 
-function deleteFileRecursive(_path) {
-  let files = fs.readdirSync(_path)
+function rmrf(_path) {
+  let files
+  try {
+    files = fs.readdirSync(_path)
+  } catch (ex) {
+    console.error(ex)
+    process.exit(0) // 避免CI挂掉
+  }
   files.forEach(file => {
     let filePath = path.join(_path, file)
     if (fs.statSync(filePath).isDirectory()) {
-      deleteFileRecursive(filePath)
+      rmrf(filePath)
     } else {
       fs.unlinkSync(filePath)
     }
@@ -18,7 +28,7 @@ function deleteFileRecursive(_path) {
   fs.rmdirSync(_path)
 }
 
-deleteFileRecursive(DIST_PATH)
+rmrf(DIST_PATH)
 fs.mkdirSync(DIST_PATH)
 
 console.log(`[Clean] Task finished.`)

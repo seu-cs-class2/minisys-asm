@@ -1,2 +1,4 @@
 *.js linguist-vendored
 *.css linguist-vendored
+*.coe linguist-vendored
+*.txt linguist-vendored
