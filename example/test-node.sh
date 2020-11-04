@@ -1,0 +1,1 @@
+node ../dist/entry/node.js ./example.asm ./

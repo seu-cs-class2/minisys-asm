@@ -1,5 +1,5 @@
 .DATA 0x000004
-buf: .WORD 0x000000ff, 0x55005500
+buf:  .word 0x000000ff, 0x55005500
 buf2: .byte 1
       .ascii "hello"
 .TEXT 
