@@ -11,5 +11,5 @@ http://zxuuu.tech/minisys/asm/
 ## CLI
 
 ```bash
-$ node dist/node.js [in_file] [out_dir]
+$ node dist/entry/node.js <in_file> <out_dir>
 ```
