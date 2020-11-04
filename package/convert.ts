@@ -101,7 +101,7 @@ export function coeToTxt(programCoe: string, dataCoe: string) {
       .split('\n')
       .filter(v => v.trim())
       .slice(2)
-      .map(x => x.replace(',', ''))
+      .map(x => x.replace(/[,;]/g, ''))
       .join('')
   const content = `${introSignal}${toStream(programCoe)}${toStream(dataCoe)}`
   return content

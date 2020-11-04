@@ -100,7 +100,7 @@ function coeToTxt(programCoe, dataCoe) {
             .split('\n')
             .filter(function (v) { return v.trim(); })
             .slice(2)
-            .map(function (x) { return x.replace(',', ''); })
+            .map(function (x) { return x.replace(/[,;]/g, ''); })
             .join('');
     };
     var content = "" + introSignal + toStream(programCoe) + toStream(dataCoe);
