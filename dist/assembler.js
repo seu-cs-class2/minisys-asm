@@ -11,7 +11,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseOneLine = exports.assemble = exports.TextSeg = exports.DataSeg = void 0;
+exports.parseOneLine = exports.assemble = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
 var instruction_1 = require("./instruction");
 var utils_1 = require("./utils");
 var DataSeg = /** @class */ (function () {
@@ -33,11 +33,12 @@ var DataSeg = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
-    DataSeg.prototype.newVar = function (name, comps) {
+    DataSeg.prototype.newVar = function (name, comps, addr) {
         utils_1.assert(this._vars.every(function (v) { return v.name !== name; }), '重复的变量名。');
         this._vars.push({
             name: name,
             comps: __spreadArrays(comps),
+            addr: addr,
         });
     };
     DataSeg.prototype.newComp = function (name, comp) {
@@ -84,6 +85,33 @@ var TextSeg = /** @class */ (function () {
     return TextSeg;
 }());
 exports.TextSeg = TextSeg;
+var vars = [];
+var labels = [];
+var pc = 0;
+function getVarAddr(name) {
+    var res = vars.find(function (v) { return v.name == name; });
+    if (res === undefined) {
+        throw new Error("\u672A\u77E5\u7684\u53D8\u91CF\uFF1A" + name);
+    }
+    else {
+        return res.addr;
+    }
+}
+exports.getVarAddr = getVarAddr;
+function getLabelAddr(label) {
+    var res = labels.find(function (l) { return l.name == label; });
+    if (res === undefined) {
+        throw new Error("\u672A\u77E5\u7684label\uFF1A" + label);
+    }
+    else {
+        return res.addr;
+    }
+}
+exports.getLabelAddr = getLabelAddr;
+function getPC() {
+    return pc;
+}
+exports.getPC = getPC;
 /**
  * 解析数据段
  * @param asm 从.data开始，到.text的前一行
@@ -95,8 +123,10 @@ function parseDataSeg(asm) {
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。');
     var VarStartPattern = /(.+):\s+\.(word|byte|half|ascii|space)\s+(.+)/;
     var VarContdPattern = /\.(word|byte|half|ascii|space)\s+(.+)/;
-    var vars = [], comps = [], name;
+    var comps = [], name;
     var i = 1;
+    var addr = Number(startAddr), nextAddr = addr;
+    vars = [];
     var _loop_1 = function () {
         if (VarStartPattern.test(asm[i])) {
             // 一个新变量开始
@@ -104,27 +134,43 @@ function parseDataSeg(asm) {
                 vars.push({
                     name: name,
                     comps: comps,
+                    addr: addr
                 });
                 comps = [];
                 name = void 0;
+                addr = nextAddr;
             }
             name = RegExp.$1;
             var type_1 = RegExp.$2;
+            var size_1 = utils_1.sizeof(type_1);
+            if (addr % size_1 > 0) {
+                nextAddr = addr = addr + size_1 - addr % size_1;
+            }
             parseInitValue(RegExp.$3).forEach(function (val) {
                 comps.push({
                     type: type_1,
                     val: val,
                 });
+                nextAddr += size_1 * (type_1 == 'ascii' ? val.length : 1);
             });
         }
         else if (VarContdPattern.test(asm[i])) {
             // 变量组分继续
             var type_2 = RegExp.$1;
+            var size_2 = utils_1.sizeof(type_2);
+            while (nextAddr % size_2 > 0) {
+                comps.push({
+                    type: 'space',
+                    val: '00'
+                });
+                nextAddr++;
+            }
             parseInitValue(RegExp.$2).forEach(function (val) {
                 comps.push({
                     type: type_2,
                     val: val,
                 });
+                nextAddr += size_2 * (type_2 == 'ascii' ? val.length : 1);
             });
         }
         else {
@@ -134,6 +180,7 @@ function parseDataSeg(asm) {
             vars.push({
                 name: name,
                 comps: comps,
+                addr: addr,
             });
         }
         i++;
@@ -151,20 +198,20 @@ function parseTextSeg(asm_) {
     var asm = Array.from(asm_);
     var startAddr = asm[0].split(/\s+/)[1] || '0';
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
+    startAddr = ((4 - Number(startAddr) % 4) % 4 + Number(startAddr)).toString();
     // 先提取掉所有的label
-    var labels = [];
+    labels = [];
+    pc = utils_1.getOffsetAddr(startAddr, 0);
     asm = asm.map(function (v, i) {
         if (i === 0)
             return v;
         if (/(\w+):\s*(.+)/.test(v)) {
             utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label: " + RegExp.$1);
-            // FIXME: 地址4字节对齐？
             labels.push({ name: RegExp.$1, lineno: i, addr: utils_1.getOffsetAddr(startAddr, utils_1.getOffset({ instruction: i - 1 })) });
             return RegExp.$2;
         }
         return v;
     });
-    labels.sort(function (a, b) { return b.name.length - a.name.length; });
     var ins = [];
     asm.forEach(function (v, i) {
         i !== 0 && ins.push(parseOneLine(v, labels, i));
@@ -207,18 +254,19 @@ function parseOneLine(asm, labels, lineno) {
     utils_1.assert(/^\s*(\w+)\s+(.*)/.test(asm), "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     var symbol = RegExp.$1;
     asm = utils_1.serialString(RegExp.$2);
-    labels.forEach(function (label) {
-        asm = asm.replace(new RegExp(label.name, 'gm'), label.addr.toString());
-    });
+    pc += utils_1.sizeof('ins');
     var instructionIndex = instruction_1.MinisysInstructions.findIndex(function (x) { return x.symbol == symbol; });
     utils_1.assert(instructionIndex !== -1, "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol + "\uFF0C\u5728\u7B2C " + lineno + " \u884C\u3002");
     var res = instruction_1.Instruction.newInstance(instruction_1.MinisysInstructions[instructionIndex]);
     utils_1.assert(res.insPattern.test(asm), "\u7B2C " + lineno + " \u884C\u6307\u4EE4\u53C2\u6570\u4E0D\u5339\u914D\uFF1A" + asm);
     res.components.forEach(function (component) {
         if (!component.val.trim()) {
-            var arg = component.toBin();
-            // TODO: 目前暂未支持变量名的转换
-            res.setComponent(component.desc, arg);
+            try {
+                res.setComponent(component.desc, component.toBin());
+            }
+            catch (err) {
+                throw new Error(err.message + ("\uFF0C\u5728\u7B2C " + lineno + "\u884C"));
+            }
         }
     });
     return res;
