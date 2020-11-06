@@ -1,10 +1,10 @@
 /**
  * Minisys汇编器 - 汇编代码解析
  * by Withod, z0gSh1u @ 2020-10
- * // TODO: 支持宏指令
  */
 
 import { Instruction, MinisysInstructions } from './instruction'
+import { expansionRules } from './macro'
 import { assert, getOffset, getOffsetAddr, serialString, sizeof } from './utils'
 
 type HexAddr = string
@@ -260,12 +260,37 @@ function parseDataSeg(asm: string[]) {
 }
 
 /**
+ * 展开代码段宏指令
+ */
+function expandMacros(asm_: string[]) {
+  let asm = Array.from(asm_)
+  let ruleIdx = -1
+  const macros = Object.keys(expansionRules)
+  let bias = 0
+  asm_.forEach((v, i) => {
+    const LabelPattern = /^(\w+:)\s*([\w\s$]+)$/
+    let labelPreserve = ''
+    if (v.match(LabelPattern)) {
+      labelPreserve = RegExp.$1
+      v = RegExp.$2.trim()
+    }
+    if ((ruleIdx = macros.findIndex(x => v.match(expansionRules[x].pattern))) !== -1) {
+      let replacer = expansionRules[macros[ruleIdx]].replacer()
+      replacer[0] = labelPreserve + ' ' + replacer[0]
+      asm.splice(i + bias, 1, ...replacer)
+      bias += replacer.length - 1
+    }
+  })
+  return asm
+}
+
+/**
  * 解析代码段
  * @param asm .text起，到代码段结束
  */
 function parseTextSeg(asm_: string[]) {
-  let asm = Array.from(asm_)
-
+  // 先展开宏指令
+  let asm = expandMacros(asm_)
   // 确定数据段起始地址
   let startAddr = asm[0].split(/\s+/)[1] || '0'
   assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。')
@@ -308,7 +333,7 @@ export function parseOneLine(asm: string, lineno: number) {
   const symbol = RegExp.$1
   // 检验助记符合法性
   const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
-  assert(instructionIndex !== -1, `没有找到指令助记符：${symbol}，在代码段第 ${lineno} 行。`)
+  assert(instructionIndex !== -1, `无效的指令助记符或错误的指令用法：${symbol}，在代码段第 ${lineno} 行。`)
   // 单行汇编去空格
   asm = serialString(RegExp.$2)
   // pc移进

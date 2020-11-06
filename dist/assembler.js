@@ -8,9 +8,17 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.assemble = exports.parseOneLine = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
 var instruction_1 = require("./instruction");
+var macro_1 = require("./macro");
 var utils_1 = require("./utils");
 // 仿照如下形式来添加新的变量类型
 // prettier-ignore
@@ -220,11 +228,26 @@ function parseDataSeg(asm) {
     return new DataSeg(startAddr, vars);
 }
 /**
+ * 展开代码段宏指令
+ */
+function expandMacros(asm_) {
+    var asm = Array.from(asm_);
+    var ruleIdx = -1;
+    var macros = Object.keys(macro_1.expansionRules);
+    asm.forEach(function (v, i) {
+        if ((ruleIdx = macros.findIndex(function (x) { return v.match(macro_1.expansionRules[x].pattern); })) !== -1)
+            asm.splice.apply(asm, __spreadArrays([i, 0], macro_1.expansionRules[macros[ruleIdx]].replacer()));
+    });
+    return asm;
+}
+/**
  * 解析代码段
  * @param asm .text起，到代码段结束
  */
 function parseTextSeg(asm_) {
-    var asm = Array.from(asm_);
+    // 先展开宏指令
+    var asm = expandMacros(asm_);
+    console.log(asm);
     // 确定数据段起始地址
     var startAddr = asm[0].split(/\s+/)[1] || '0';
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
@@ -261,7 +284,7 @@ function parseOneLine(asm, lineno) {
     var symbol = RegExp.$1;
     // 检验助记符合法性
     var instructionIndex = instruction_1.MinisysInstructions.findIndex(function (x) { return x.symbol == symbol; });
-    utils_1.assert(instructionIndex !== -1, "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol + "\uFF0C\u5728\u4EE3\u7801\u6BB5\u7B2C " + lineno + " \u884C\u3002");
+    utils_1.assert(instructionIndex !== -1, "\u65E0\u6548\u7684\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol + "\uFF0C\u5728\u4EE3\u7801\u6BB5\u7B2C " + lineno + " \u884C\u3002");
     // 单行汇编去空格
     asm = utils_1.serialString(RegExp.$2);
     // pc移进

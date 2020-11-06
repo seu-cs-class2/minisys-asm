@@ -10,4 +10,8 @@ start:  addi  $t0, $zero, 0
         add   $v0, $v0, $v1
         addi  $t0, $t0, 4
         sw    $v0, 20($t0)
+        push  $2
+        pop   $2
+        jg    $2, $3, 40
+        jle   $2, $3, start
         j     start
