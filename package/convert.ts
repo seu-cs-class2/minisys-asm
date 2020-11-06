@@ -97,7 +97,7 @@ export function coeToTxt(programCoe: string, dataCoe: string) {
    */
   const toStream = (coe: string) =>
     coe
-      .replace(/\r\n/, '\n')
+      .replace(/\r\n/g, '\n')
       .split('\n')
       .filter(v => v.trim())
       .slice(2)
