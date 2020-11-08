@@ -2,7 +2,6 @@
 /**
  * Minisys汇编器 - 汇编代码解析
  * by Withod, z0gSh1u @ 2020-10
- * // TODO: 支持宏指令
  */
 var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
@@ -15,8 +14,12 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.assemble = exports.parseOneLine = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
+var unraw_1 = __importDefault(require("unraw"));
 var instruction_1 = require("./instruction");
 var macro_1 = require("./macro");
 var utils_1 = require("./utils");
@@ -144,10 +147,69 @@ exports.getPC = getPC;
 function parseDataSeg(asm) {
     // 解析初始化值
     // FIXME: ASCII转义、引号内带逗号处理
-    var parseInitValue = function (init) { return init.split(/\s*,/).map(function (v) { return v.trim(); }); };
+    var parseInitValue = function (type, init) {
+        utils_1.assert(!(type !== 'ascii' && init.includes('"')), '字符串型数据只能使用.ascii类型');
+        init = init.trim();
+        utils_1.assert(init[0] !== ',' && init[init.length - 1] !== ',', '数据初始化值头或尾有非法逗号');
+        if (type !== 'ascii') {
+            return init.split(/\s*,/).map(function (v) { return v.trim(); });
+        }
+        else {
+            var inQuote = false, nextEscape = false, res = [], buf = '', prev = '';
+            for (var i_1 = 0; i_1 < init.length; i_1++) {
+                var ch = init.charAt(i_1);
+                if (!inQuote && !ch.trim())
+                    continue;
+                if (ch == '"') {
+                    if (nextEscape) {
+                        utils_1.assert(inQuote, '有非法字符出现在引号以外');
+                        buf += '"';
+                        nextEscape = false;
+                    }
+                    else {
+                        inQuote = !inQuote;
+                    }
+                }
+                else if (ch == '\\') {
+                    utils_1.assert(inQuote, '有非法字符出现在引号以外');
+                    if (nextEscape) {
+                        buf += '\\';
+                        nextEscape = false;
+                    }
+                    else {
+                        nextEscape = true;
+                    }
+                }
+                else if (ch == ',') {
+                    if (inQuote) {
+                        buf += ','; // 引号内逗号可不escape
+                        nextEscape = false;
+                    }
+                    else {
+                        utils_1.assert(prev !== ',', '数据初始化值存在连续的逗号分隔');
+                        res.push(buf);
+                        buf = '';
+                    }
+                }
+                else {
+                    utils_1.assert(inQuote, '有非法字符出现在引号以外');
+                    if (nextEscape) {
+                        buf += unraw_1.default('\\' + ch);
+                    }
+                    else {
+                        buf += ch;
+                    }
+                    nextEscape = false;
+                }
+                prev = ch;
+            }
+            res.push(buf);
+            return res;
+        }
+    };
     // 检查起始地址
     var startAddr = asm[0].split(/\s+/)[1] || '0';
-    utils_1.assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。');
+    utils_1.assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法');
     // 变量声明开始正则
     var VarStartPattern = new RegExp(String.raw(templateObject_1 || (templateObject_1 = __makeTemplateObject(["(.+):s+.(", ")s+(.+)"], ["(.+):\\s+\\.(", ")\\s+(.+)"])), VarCompTypeRegex));
     // 变量声明继续正则
@@ -177,7 +239,8 @@ function parseDataSeg(asm) {
                 nextAddr = addr = addr + size_1 - (addr % size_1);
             }
             // 推入组分记录
-            parseInitValue(RegExp.$3).forEach(function (val) {
+            console.log(parseInitValue(type_1, RegExp.$3));
+            parseInitValue(type_1, RegExp.$3).forEach(function (val) {
                 comps.push({
                     type: type_1,
                     val: val,
@@ -199,7 +262,8 @@ function parseDataSeg(asm) {
                 nextAddr++;
             }
             // 推入组分记录
-            parseInitValue(RegExp.$2).forEach(function (val) {
+            console.log(parseInitValue(type_2, RegExp.$2));
+            parseInitValue(type_2, RegExp.$2).forEach(function (val) {
                 comps.push({
                     type: type_2,
                     val: val,
@@ -234,9 +298,20 @@ function expandMacros(asm_) {
     var asm = Array.from(asm_);
     var ruleIdx = -1;
     var macros = Object.keys(macro_1.expansionRules);
-    asm.forEach(function (v, i) {
-        if ((ruleIdx = macros.findIndex(function (x) { return v.match(macro_1.expansionRules[x].pattern); })) !== -1)
-            asm.splice.apply(asm, __spreadArrays([i, 0], macro_1.expansionRules[macros[ruleIdx]].replacer()));
+    var bias = 0;
+    asm_.forEach(function (v, i) {
+        var LabelPattern = /^(\w+:)\s*([\w\s$]+)$/;
+        var labelPreserve = '';
+        if (v.match(LabelPattern)) {
+            labelPreserve = RegExp.$1;
+            v = RegExp.$2.trim();
+        }
+        if ((ruleIdx = macros.findIndex(function (x) { return v.match(macro_1.expansionRules[x].pattern); })) !== -1) {
+            var replacer = macro_1.expansionRules[macros[ruleIdx]].replacer();
+            replacer[0] = labelPreserve + ' ' + replacer[0];
+            asm.splice.apply(asm, __spreadArrays([i + bias, 1], replacer));
+            bias += replacer.length - 1;
+        }
     });
     return asm;
 }
@@ -247,7 +322,6 @@ function expandMacros(asm_) {
 function parseTextSeg(asm_) {
     // 先展开宏指令
     var asm = expandMacros(asm_);
-    console.log(asm);
     // 确定数据段起始地址
     var startAddr = asm[0].split(/\s+/)[1] || '0';
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
@@ -284,7 +358,7 @@ function parseOneLine(asm, lineno) {
     var symbol = RegExp.$1;
     // 检验助记符合法性
     var instructionIndex = instruction_1.MinisysInstructions.findIndex(function (x) { return x.symbol == symbol; });
-    utils_1.assert(instructionIndex !== -1, "\u65E0\u6548\u7684\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF1A" + symbol + "\uFF0C\u5728\u4EE3\u7801\u6BB5\u7B2C " + lineno + " \u884C\u3002");
+    utils_1.assert(instructionIndex !== -1, "\u65E0\u6548\u7684\u6307\u4EE4\u52A9\u8BB0\u7B26\u6216\u9519\u8BEF\u7684\u6307\u4EE4\u7528\u6CD5\uFF1A" + symbol + "\uFF0C\u5728\u4EE3\u7801\u6BB5\u7B2C " + lineno + " \u884C\u3002");
     // 单行汇编去空格
     asm = utils_1.serialString(RegExp.$2);
     // pc移进

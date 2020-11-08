@@ -3,6 +3,7 @@
  * by Withod, z0gSh1u @ 2020-10
  */
 
+import unraw from 'unraw'
 import { Instruction, MinisysInstructions } from './instruction'
 import { expansionRules } from './macro'
 import { assert, getOffset, getOffsetAddr, serialString, sizeof } from './utils'
@@ -172,12 +173,65 @@ export function getPC() {
  */
 function parseDataSeg(asm: string[]) {
   // 解析初始化值
-  // FIXME: ASCII转义、引号内带逗号处理
-  const parseInitValue = (init: string) => init.split(/\s*,/).map(v => v.trim())
+  const parseInitValue = (type: VarCompType, init: string) => {
+    assert(!(type !== 'ascii' && init.includes('"')), '字符串型数据只能使用.ascii类型')
+    init = init.trim()
+    assert(init[0] !== ',' && init[init.length - 1] !== ',', '数据初始化值头或尾有非法逗号')
+    if (type !== 'ascii') {
+      return init.split(/\s*,/).map(v => v.trim())
+    } else {
+      let inQuote = false,
+        nextEscape = false,
+        res = [],
+        buf = '',
+        prev = ''
+      for (let i = 0; i < init.length; i++) {
+        let ch = init.charAt(i)
+        if (!inQuote && !ch.trim()) continue
+        if (ch == '"') {
+          if (nextEscape) {
+            assert(inQuote, '有非法字符出现在引号以外')
+            buf += '"'
+            nextEscape = false
+          } else {
+            inQuote = !inQuote
+          }
+        } else if (ch == '\\') {
+          assert(inQuote, '有非法字符出现在引号以外')
+          if (nextEscape) {
+            buf += '\\'
+            nextEscape = false
+          } else {
+            nextEscape = true
+          }
+        } else if (ch == ',') {
+          if (inQuote) {
+            buf += ',' // 引号内逗号可不escape
+            nextEscape = false
+          } else {
+            assert(prev !== ',', '数据初始化值存在连续的逗号分隔')
+            res.push(buf)
+            buf = ''
+          }
+        } else {
+          assert(inQuote, '有非法字符出现在引号以外')
+          if (nextEscape) {
+            buf += unraw('\\' + ch)
+          } else {
+            buf += ch
+          }
+          nextEscape = false
+        }
+        prev = ch
+      }
+      res.push(buf)
+      return res
+    }
+  }
 
   // 检查起始地址
   const startAddr = asm[0].split(/\s+/)[1] || '0'
-  assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法。')
+  assert(asm[0].split(/\s+/).length <= 2, '数据段首声明非法')
 
   // 变量声明开始正则
   const VarStartPattern = new RegExp(String.raw`(.+):\s+\.(${VarCompTypeRegex})\s+(.+)`)
@@ -213,7 +267,7 @@ function parseDataSeg(asm: string[]) {
         nextAddr = addr = addr + size - (addr % size)
       }
       // 推入组分记录
-      parseInitValue(RegExp.$3).forEach(val => {
+      parseInitValue(type, RegExp.$3).forEach(val => {
         comps.push({
           type,
           val,
@@ -229,12 +283,12 @@ function parseDataSeg(asm: string[]) {
       while (nextAddr % size > 0) {
         comps.push({
           type: 'space',
-          val: '00', // 其实写啥都行
+          val: '00',
         })
         nextAddr++
       }
       // 推入组分记录
-      parseInitValue(RegExp.$2).forEach(val => {
+      parseInitValue(type, RegExp.$2).forEach(val => {
         comps.push({
           type,
           val,
