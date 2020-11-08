@@ -96,7 +96,7 @@ function coeToTxt(programCoe, dataCoe) {
      */
     var toStream = function (coe) {
         return coe
-            .replace(/\r\n/, '\n')
+            .replace(/\r\n/g, '\n')
             .split('\n')
             .filter(function (v) { return v.trim(); })
             .slice(2)

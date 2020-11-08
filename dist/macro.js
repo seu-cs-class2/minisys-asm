@@ -16,11 +16,10 @@ exports.expansionRules = {
     },
     // 根据“MiniSys-1A CPU 的寄存器及其约定”，$1（$at）固定用作汇编器的暂时变量
     jg: {
-        pattern: /^jg\s+(\$\w{1,2})\s+(\$\w{1,2})\s+(\w+)/i,
+        pattern: /^jg\s+(\$\w{1,2}),\s+(\$\w{1,2}),\s+(\w+)$/i,
         replacer: function () { return [
             'addi $sp, $sp, -4',
             'sw $1, 0($sp)',
-            'push $1',
             "slt $1, " + RegExp.$2 + ", " + RegExp.$1,
             "bne $1, $0, " + RegExp.$3,
             'lw $1, 0($sp)',
@@ -28,11 +27,10 @@ exports.expansionRules = {
         ]; },
     },
     jge: {
-        pattern: /^jge\s+(\$\w{1,2})\s+(\$\w{1,2})\s+(\w+)/i,
+        pattern: /^jge\s+(\$\w{1,2}),\s+(\$\w{1,2}),\s+(\w+)$/i,
         replacer: function () { return [
             'addi $sp, $sp, -4',
             'sw $1, 0($sp)',
-            'push $1',
             "slt $1, " + RegExp.$1 + ", " + RegExp.$2,
             "beq $1, $0, " + RegExp.$3,
             'lw $1, 0($sp)',
@@ -40,11 +38,10 @@ exports.expansionRules = {
         ]; },
     },
     jl: {
-        pattern: /^jl\s+(\$\w{1,2})\s+(\$\w{1,2})\s+(\w+)/i,
+        pattern: /^jl\s+(\$\w{1,2}),\s+(\$\w{1,2}),\s+(\w+)$/i,
         replacer: function () { return [
             'addi $sp, $sp, -4',
             'sw $1, 0($sp)',
-            'push $1',
             "slt $1, " + RegExp.$1 + ", " + RegExp.$2,
             "bne $1, $0, " + RegExp.$3,
             'lw $1, 0($sp)',
@@ -52,11 +49,10 @@ exports.expansionRules = {
         ]; },
     },
     jle: {
-        pattern: /^jle\s+(\$\w{1,2})\s+(\$\w{1,2})\s+(\w+)/i,
+        pattern: /^jle\s+(\$\w{1,2}),\s+(\$\w{1,2}),\s+(\w+)$/i,
         replacer: function () { return [
             'addi $sp, $sp, -4',
             'sw $1, 0($sp)',
-            'push $1',
             "slt $1, " + RegExp.$2 + ", " + RegExp.$1,
             "beq $1, $0, " + RegExp.$3,
             'lw $1, 0($sp)',
