@@ -20,4 +20,4 @@ before_install:
 addons:
   ssh_known_hosts: 101.132.143.124
 after_success:
-  - ssh root@101.132.143.124 "/var/www/auto_deploy/minisys_asm/deploy.sh"
+  - ssh root@101.132.143.124 "/var/www/auto-deploy/minisys-asm/deploy.sh"
