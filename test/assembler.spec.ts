@@ -1,7 +1,7 @@
 import { parseOneLine } from '../package/assembler'
 import { serialString } from '../package/utils'
 
-describe('AsmParser.ts', () => {
+describe('assembler.ts', () => {
   describe('parseOneLine', () => {
     test('R型指令解析正确', () => {
       expect(parseOneLine('mult $2, $v1', 0).toBinary()).toBe(serialString('000000 00010 00011 0000000000 011000'))
