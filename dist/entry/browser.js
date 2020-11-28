@@ -6,6 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var assembler_1 = require("../assembler");
 var convert_1 = require("../convert");
+var utils_1 = require("../utils");
 var lastModifiedInfo = ''; // 页面提示语
 function $(selector) {
     return document.querySelector(selector);
@@ -34,6 +35,18 @@ function setStatus(to, trace) {
     }
 }
 /**
+ * 转换汇编结果的进制
+ * @param res 原汇编结果
+ */
+function assembleResultSwitch(res) {
+    if ($('#hexSwitch').checked) {
+        return res.split('\n').map(function (binaryLine) { return utils_1.binToHex(binaryLine, false); }).join('\n');
+    }
+    else {
+        return res.split('\n').map(function (binaryLine) { return utils_1.hexToBin(binaryLine); }).join('\n');
+    }
+}
+/**
  * 网页端触发汇编
  */
 function assembleBrowser() {
@@ -41,7 +54,12 @@ function assembleBrowser() {
     try {
         var result = assembler_1.assemble(asmCode);
         var binary = result.textSeg.toBinary();
-        resultDOM.value = binary;
+        if ($('#hexSwitch').checked) {
+            resultDOM.value = assembleResultSwitch(binary);
+        }
+        else {
+            resultDOM.value = binary;
+        }
         setStatus('success');
     }
     catch (ex) {
@@ -67,6 +85,10 @@ function downloadFile(content, filename) {
     document.body.removeChild(linkDOM);
 }
 window.addEventListener('load', function () {
+    // 汇编结果进制切换处理逻辑
+    $('#hexSwitch').onchange = function () {
+        resultDOM.value = assembleResultSwitch(resultDOM.value);
+    };
     // 按钮处理逻辑
     $('#asm-assemble').onclick = assembleBrowser;
     $('#asm-download-coe').onclick = function () {

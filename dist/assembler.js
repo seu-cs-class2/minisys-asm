@@ -146,7 +146,6 @@ exports.getPC = getPC;
  */
 function parseDataSeg(asm) {
     // 解析初始化值
-    // FIXME: ASCII转义、引号内带逗号处理
     var parseInitValue = function (type, init) {
         utils_1.assert(!(type !== 'ascii' && init.includes('"')), '字符串型数据只能使用.ascii类型');
         init = init.trim();
@@ -239,7 +238,6 @@ function parseDataSeg(asm) {
                 nextAddr = addr = addr + size_1 - (addr % size_1);
             }
             // 推入组分记录
-            console.log(parseInitValue(type_1, RegExp.$3));
             parseInitValue(type_1, RegExp.$3).forEach(function (val) {
                 comps.push({
                     type: type_1,
@@ -262,7 +260,6 @@ function parseDataSeg(asm) {
                 nextAddr++;
             }
             // 推入组分记录
-            console.log(parseInitValue(type_2, RegExp.$2));
             parseInitValue(type_2, RegExp.$2).forEach(function (val) {
                 comps.push({
                     type: type_2,
@@ -286,9 +283,9 @@ function parseDataSeg(asm) {
         i++;
     };
     // 开始扫描
-    do {
+    while (i < asm.length) {
         _loop_1();
-    } while (i < asm.length);
+    }
     return new DataSeg(startAddr, vars);
 }
 /**
@@ -387,7 +384,7 @@ exports.parseOneLine = parseOneLine;
 function assemble(asm_) {
     // 格式化之：去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格，均小写。
     // TODO: 是否能实现报错行号与实际情况严格对应？（此处去除了空行，实际上不对应）
-    var asm = asm_
+    var asm = (asm_ + '\n')
         .replace(/\r\n/g, '\n')
         .replace(/#(.*)\n/g, '\n')
         .replace(/:\s*\n/g, ': ')

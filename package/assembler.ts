@@ -246,7 +246,7 @@ function parseDataSeg(asm: string[]) {
   vars = []
 
   // 开始扫描
-  do {
+  while (i < asm.length) {
     if (VarStartPattern.test(asm[i])) {
       // 一个新变量开始
       if (name !== void 0) {
@@ -308,7 +308,7 @@ function parseDataSeg(asm: string[]) {
       })
     }
     i++
-  } while (i < asm.length)
+  }
 
   return new DataSeg(startAddr, vars)
 }
@@ -417,7 +417,7 @@ export function parseOneLine(asm: string, lineno: number) {
 export function assemble(asm_: string) {
   // 格式化之：去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格，均小写。
   // TODO: 是否能实现报错行号与实际情况严格对应？（此处去除了空行，实际上不对应）
-  const asm = asm_
+  const asm = (asm_ + '\n')
     .replace(/\r\n/g, '\n')
     .replace(/#(.*)\n/g, '\n')
     .replace(/:\s*\n/g, ': ')
