@@ -246,7 +246,7 @@ function parseDataSeg(asm: string[]) {
   vars = []
 
   // 开始扫描
-  do {
+  while (i < asm.length) {
     if (VarStartPattern.test(asm[i])) {
       // 一个新变量开始
       if (name !== void 0) {
@@ -308,7 +308,7 @@ function parseDataSeg(asm: string[]) {
       })
     }
     i++
-  } while (i < asm.length)
+  }
 
   return new DataSeg(startAddr, vars)
 }
