@@ -7,6 +7,7 @@
 import { Ace } from '../typing/ace'
 import { assemble } from '../assembler'
 import { coeToTxt, dataSegToCoe, textSegToCoe } from '../convert'
+import { binToHex, hexToBin } from '../utils'
 
 const lastModifiedInfo = '' // 页面提示语
 
@@ -39,6 +40,18 @@ function setStatus(to: 'success' | 'fail', trace?: string) {
 }
 
 /**
+ * 转换汇编结果的进制
+ * @param res 原汇编结果
+ */
+function assembleResultSwitch(res: string) {
+  if ($<HTMLInputElement>('#hexSwitch').checked) {
+    return res.split('\n').map(binaryLine => binToHex(binaryLine, false)).join('\n')
+  } else {
+    return res.split('\n').map(binaryLine => hexToBin(binaryLine)).join('\n')
+  }
+}
+
+/**
  * 网页端触发汇编
  */
 function assembleBrowser() {
@@ -46,7 +59,11 @@ function assembleBrowser() {
   try {
     const result = assemble(asmCode)
     const binary = result.textSeg.toBinary()
-    resultDOM.value = binary
+    if ($<HTMLInputElement>('#hexSwitch').checked) {
+      resultDOM.value = assembleResultSwitch(binary)
+    } else {
+      resultDOM.value = binary
+    }
     setStatus('success')
   } catch (ex) {
     setStatus('fail', ex)
@@ -73,6 +90,10 @@ function downloadFile(content: string, filename: string) {
 }
 
 window.addEventListener('load', () => {
+  // 汇编结果进制切换处理逻辑
+  $<HTMLInputElement>('#hexSwitch').onchange = () => {
+    resultDOM.value = assembleResultSwitch(resultDOM.value)
+  }
   // 按钮处理逻辑
   $<HTMLButtonElement>('#asm-assemble').onclick = assembleBrowser
   $<HTMLButtonElement>('#asm-download-coe').onclick = () => {
