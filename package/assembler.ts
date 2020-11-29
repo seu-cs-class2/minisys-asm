@@ -316,7 +316,7 @@ function parseDataSeg(asm: string[]) {
 /**
  * 展开代码段宏指令
  */
-function expandMacros(asm_: string[]) {
+function expandMacros(asm_: string[], lineno_: number[]) {
   let asm = Array.from(asm_)
   let ruleIdx = -1
   const macros = Object.keys(expansionRules)
@@ -332,6 +332,7 @@ function expandMacros(asm_: string[]) {
       let replacer = expansionRules[macros[ruleIdx]].replacer()
       replacer[0] = labelPreserve + ' ' + replacer[0]
       asm.splice(i + bias, 1, ...replacer)
+      lineno_.splice(i + bias, 1, ...new Array(replacer.length).fill(lineno_[i + bias]))
       bias += replacer.length - 1
     }
   })
@@ -342,9 +343,9 @@ function expandMacros(asm_: string[]) {
  * 解析代码段
  * @param asm .text起，到代码段结束
  */
-function parseTextSeg(asm_: string[]) {
+function parseTextSeg(asm_: string[], lineno: number[]) {
   // 先展开宏指令
-  let asm = expandMacros(asm_)
+  let asm = expandMacros(asm_, lineno)
   // 确定数据段起始地址
   let startAddr = asm[0].split(/\s+/)[1] || '0'
   assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。')
@@ -355,24 +356,30 @@ function parseTextSeg(asm_: string[]) {
   // pc指针
   pc = getOffsetAddr(startAddr, 0)
   labels = []
+  // 去除label后指令实际行号
+  let insLineno = 1
 
   // 先提取掉所有的label
   asm = asm.map((v, i) => {
     if (i === 0) return v
-    if (/(\w+):\s*(.+)/.test(v)) {
+    if (/(\w+):\s*(.*)/.test(v)) {
       assert(
         labels.every(label => label.name !== RegExp.$1),
-        `存在重复的label：${RegExp.$1}`
+        `存在重复的label：${RegExp.$1}，在代码段第${lineno[i]}行。`
       )
-      labels.push({ name: RegExp.$1, lineno: i, addr: getOffsetAddr(startAddr, getOffset({ ins: i - 1 })) })
+      labels.push({ name: RegExp.$1, lineno: insLineno, addr: getOffsetAddr(startAddr, getOffset({ ins: insLineno - 1 })) })
+      if (RegExp.$2.trim()) insLineno++
       return RegExp.$2
     }
+    insLineno++
     return v
   })
+  lineno = lineno.filter((x, i) => asm[i].trim())
+  asm = asm.filter(x => x.trim())
 
   const ins: Instruction[] = []
   asm.forEach((v, i) => {
-    i !== 0 && ins.push(parseOneLine(v, i))
+    i !== 0 && ins.push(parseOneLine(v, lineno[i]))
   })
 
   return new TextSeg(startAddr, ins, labels)
@@ -417,11 +424,13 @@ export function parseOneLine(asm: string, lineno: number) {
 export function assemble(asm_: string) {
   // 格式化之：去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格，均小写。
   // TODO: 是否能实现报错行号与实际情况严格对应？（此处去除了空行，实际上不对应）
-  const asm = (asm_ + '\n')
+  const asm__ = (asm_ + '\n')
     .replace(/\r\n/g, '\n')
     .replace(/#(.*)\n/g, '\n')
-    .replace(/:\s*\n/g, ': ')
     .split('\n')
+  const lineno = Array.from(new Array(asm__.length), (x, i) => i + 1)
+    .filter(x => asm__[x - 1].trim())
+  const asm = asm__
     .filter(x => x.trim())
     .map(x => x.trim().replace(/\s+/g, ' ').replace(/,\s*/, ', ').toLowerCase())
 
@@ -435,7 +444,7 @@ export function assemble(asm_: string) {
   // 解析数据段
   const dataSeg = parseDataSeg(asm.slice(dataSegStartLine, textSegStartLine))
   // 解析代码段
-  const textSeg = parseTextSeg(asm.slice(textSegStartLine))
+  const textSeg = parseTextSeg(asm.slice(textSegStartLine), lineno.slice(textSegStartLine))
 
   return {
     dataSeg,
