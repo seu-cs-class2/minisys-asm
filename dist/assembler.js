@@ -291,7 +291,7 @@ function parseDataSeg(asm) {
 /**
  * 展开代码段宏指令
  */
-function expandMacros(asm_) {
+function expandMacros(asm_, lineno_) {
     var asm = Array.from(asm_);
     var ruleIdx = -1;
     var macros = Object.keys(macro_1.expansionRules);
@@ -307,6 +307,7 @@ function expandMacros(asm_) {
             var replacer = macro_1.expansionRules[macros[ruleIdx]].replacer();
             replacer[0] = labelPreserve + ' ' + replacer[0];
             asm.splice.apply(asm, __spreadArrays([i + bias, 1], replacer));
+            lineno_.splice.apply(lineno_, __spreadArrays([i + bias, 1], new Array(replacer.length).fill(lineno_[i + bias])));
             bias += replacer.length - 1;
         }
     });
@@ -316,9 +317,9 @@ function expandMacros(asm_) {
  * 解析代码段
  * @param asm .text起，到代码段结束
  */
-function parseTextSeg(asm_) {
+function parseTextSeg(asm_, lineno) {
     // 先展开宏指令
-    var asm = expandMacros(asm_);
+    var asm = expandMacros(asm_, lineno);
     // 确定数据段起始地址
     var startAddr = asm[0].split(/\s+/)[1] || '0';
     utils_1.assert(asm[0].split(/\s+/).length <= 2, '代码段首声明非法。');
@@ -329,20 +330,27 @@ function parseTextSeg(asm_) {
     // pc指针
     pc = utils_1.getOffsetAddr(startAddr, 0);
     labels = [];
+    // 去除label后指令实际行号
+    var insLineno = 1;
     // 先提取掉所有的label
     asm = asm.map(function (v, i) {
         if (i === 0)
             return v;
-        if (/(\w+):\s*(.+)/.test(v)) {
-            utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label\uFF1A" + RegExp.$1);
-            labels.push({ name: RegExp.$1, lineno: i, addr: utils_1.getOffsetAddr(startAddr, utils_1.getOffset({ ins: i - 1 })) });
+        if (/(\w+):\s*(.*)/.test(v)) {
+            utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label\uFF1A" + RegExp.$1 + "\uFF0C\u5728\u4EE3\u7801\u6BB5\u7B2C" + lineno[i] + "\u884C\u3002");
+            labels.push({ name: RegExp.$1, lineno: insLineno, addr: utils_1.getOffsetAddr(startAddr, utils_1.getOffset({ ins: insLineno - 1 })) });
+            if (RegExp.$2.trim())
+                insLineno++;
             return RegExp.$2;
         }
+        insLineno++;
         return v;
     });
+    lineno = lineno.filter(function (x, i) { return asm[i].trim(); });
+    asm = asm.filter(function (x) { return x.trim(); });
     var ins = [];
     asm.forEach(function (v, i) {
-        i !== 0 && ins.push(parseOneLine(v, i));
+        i !== 0 && ins.push(parseOneLine(v, lineno[i]));
     });
     return new TextSeg(startAddr, ins, labels);
 }
@@ -384,11 +392,13 @@ exports.parseOneLine = parseOneLine;
 function assemble(asm_) {
     // 格式化之：去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格，均小写。
     // TODO: 是否能实现报错行号与实际情况严格对应？（此处去除了空行，实际上不对应）
-    var asm = (asm_ + '\n')
+    var asm__ = (asm_ + '\n')
         .replace(/\r\n/g, '\n')
         .replace(/#(.*)\n/g, '\n')
-        .replace(/:\s*\n/g, ': ')
-        .split('\n')
+        .split('\n');
+    var lineno = Array.from(new Array(asm__.length), function (x, i) { return i + 1; })
+        .filter(function (x) { return asm__[x - 1].trim(); });
+    var asm = asm__
         .filter(function (x) { return x.trim(); })
         .map(function (x) { return x.trim().replace(/\s+/g, ' ').replace(/,\s*/, ', ').toLowerCase(); });
     // 挑出代码段和数据段
@@ -400,7 +410,7 @@ function assemble(asm_) {
     // 解析数据段
     var dataSeg = parseDataSeg(asm.slice(dataSegStartLine, textSegStartLine));
     // 解析代码段
-    var textSeg = parseTextSeg(asm.slice(textSegStartLine));
+    var textSeg = parseTextSeg(asm.slice(textSegStartLine), lineno.slice(textSegStartLine));
     return {
         dataSeg: dataSeg,
         textSeg: textSeg,
