@@ -20,7 +20,7 @@ var registerNames = [
 /**
  * 返回寄存器对应的五位二进制号
  * @example $1 1 sp $sp
- * @warn 请勿在本函数内覆盖RegExp.$x // FIXME
+ * @warn 请勿在本函数内覆盖RegExp.$x
  */
 function regToBin(reg) {
     reg = reg.replace('$', '').trim();

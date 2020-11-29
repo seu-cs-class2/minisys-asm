@@ -28,6 +28,9 @@ body {
   text-decoration: none;
   color: #33f;
 }
+#hexSwitch {
+  margin-bottom: 10px;
+}
 .content {
   width: 100%;
   height: calc(100% - 52px);

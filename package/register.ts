@@ -20,7 +20,7 @@ const registerNames = [
 /**
  * 返回寄存器对应的五位二进制号
  * @example $1 1 sp $sp
- * @warn 请勿在本函数内覆盖RegExp.$x // FIXME
+ * @warn 请勿在本函数内覆盖RegExp.$x
  */
 export function regToBin(reg: string) {
   reg = reg.replace('$', '').trim()

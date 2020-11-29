@@ -272,7 +272,6 @@ function parseDataSeg(asm: string[]) {
           type,
           val,
         })
-        // TODO: 确保val.length正确
         nextAddr += size * (type === 'ascii' ? val.length : 1)
       })
     } else if (VarContdPattern.test(asm[i])) {
@@ -365,7 +364,7 @@ function parseTextSeg(asm_: string[], lineno: number[]) {
     if (/(\w+):\s*(.*)/.test(v)) {
       assert(
         labels.every(label => label.name !== RegExp.$1),
-        `存在重复的label：${RegExp.$1}，在代码段第${lineno[i]}行。`
+        `存在重复的label：${RegExp.$1}，在代码第${lineno[i]}行。`
       )
       labels.push({ name: RegExp.$1, lineno: insLineno, addr: getOffsetAddr(startAddr, getOffset({ ins: insLineno - 1 })) })
       if (RegExp.$2.trim()) insLineno++
@@ -390,11 +389,11 @@ function parseTextSeg(asm_: string[], lineno: number[]) {
  */
 export function parseOneLine(asm: string, lineno: number) {
   // 处理助记符
-  assert(/^\s*(\w+)\s+(.*)/.test(asm), `没有找到指令助记符，在代码段第 ${lineno} 行。`)
+  assert(/^\s*(\w+)\s+(.*)/.test(asm), `没有找到指令助记符，在代码第 ${lineno} 行。`)
   const symbol = RegExp.$1
   // 检验助记符合法性
   const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
-  assert(instructionIndex !== -1, `无效的指令助记符或错误的指令用法：${symbol}，在代码段第 ${lineno} 行。`)
+  assert(instructionIndex !== -1, `无效的指令助记符或错误的指令用法：${symbol}，在代码第 ${lineno} 行。`)
   // 单行汇编去空格
   asm = serialString(RegExp.$2)
   // pc移进
@@ -408,7 +407,7 @@ export function parseOneLine(asm: string, lineno: number) {
       try {
         res.setComponent(component.desc, component.toBinary())
       } catch (err) {
-        err.message += `，在代码段第 ${lineno} 行`
+        err.message += `，在代码第 ${lineno} 行`
         throw err
       }
     }
@@ -423,7 +422,6 @@ export function parseOneLine(asm: string, lineno: number) {
  */
 export function assemble(asm_: string) {
   // 格式化之：去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格，均小写。
-  // TODO: 是否能实现报错行号与实际情况严格对应？（此处去除了空行，实际上不对应）
   const asm__ = (asm_ + '\n')
     .replace(/\r\n/g, '\n')
     .replace(/#(.*)\n/g, '\n')

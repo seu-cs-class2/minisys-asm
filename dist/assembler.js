@@ -243,7 +243,6 @@ function parseDataSeg(asm) {
                     type: type_1,
                     val: val,
                 });
-                // TODO: 确保val.length正确
                 nextAddr += size_1 * (type_1 === 'ascii' ? val.length : 1);
             });
         }
@@ -337,7 +336,7 @@ function parseTextSeg(asm_, lineno) {
         if (i === 0)
             return v;
         if (/(\w+):\s*(.*)/.test(v)) {
-            utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label\uFF1A" + RegExp.$1 + "\uFF0C\u5728\u4EE3\u7801\u6BB5\u7B2C" + lineno[i] + "\u884C\u3002");
+            utils_1.assert(labels.every(function (label) { return label.name !== RegExp.$1; }), "\u5B58\u5728\u91CD\u590D\u7684label\uFF1A" + RegExp.$1 + "\uFF0C\u5728\u4EE3\u7801\u7B2C" + lineno[i] + "\u884C\u3002");
             labels.push({ name: RegExp.$1, lineno: insLineno, addr: utils_1.getOffsetAddr(startAddr, utils_1.getOffset({ ins: insLineno - 1 })) });
             if (RegExp.$2.trim())
                 insLineno++;
@@ -359,11 +358,11 @@ function parseTextSeg(asm_, lineno) {
  */
 function parseOneLine(asm, lineno) {
     // 处理助记符
-    utils_1.assert(/^\s*(\w+)\s+(.*)/.test(asm), "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF0C\u5728\u4EE3\u7801\u6BB5\u7B2C " + lineno + " \u884C\u3002");
+    utils_1.assert(/^\s*(\w+)\s+(.*)/.test(asm), "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF0C\u5728\u4EE3\u7801\u7B2C " + lineno + " \u884C\u3002");
     var symbol = RegExp.$1;
     // 检验助记符合法性
     var instructionIndex = instruction_1.MinisysInstructions.findIndex(function (x) { return x.symbol == symbol; });
-    utils_1.assert(instructionIndex !== -1, "\u65E0\u6548\u7684\u6307\u4EE4\u52A9\u8BB0\u7B26\u6216\u9519\u8BEF\u7684\u6307\u4EE4\u7528\u6CD5\uFF1A" + symbol + "\uFF0C\u5728\u4EE3\u7801\u6BB5\u7B2C " + lineno + " \u884C\u3002");
+    utils_1.assert(instructionIndex !== -1, "\u65E0\u6548\u7684\u6307\u4EE4\u52A9\u8BB0\u7B26\u6216\u9519\u8BEF\u7684\u6307\u4EE4\u7528\u6CD5\uFF1A" + symbol + "\uFF0C\u5728\u4EE3\u7801\u7B2C " + lineno + " \u884C\u3002");
     // 单行汇编去空格
     asm = utils_1.serialString(RegExp.$2);
     // pc移进
@@ -377,7 +376,7 @@ function parseOneLine(asm, lineno) {
                 res.setComponent(component.desc, component.toBinary());
             }
             catch (err) {
-                err.message += "\uFF0C\u5728\u4EE3\u7801\u6BB5\u7B2C " + lineno + " \u884C";
+                err.message += "\uFF0C\u5728\u4EE3\u7801\u7B2C " + lineno + " \u884C";
                 throw err;
             }
         }
@@ -391,7 +390,6 @@ exports.parseOneLine = parseOneLine;
  */
 function assemble(asm_) {
     // 格式化之：去掉空行；CRLF均变LF；均用单个空格分分隔；逗号后带空格，均小写。
-    // TODO: 是否能实现报错行号与实际情况严格对应？（此处去除了空行，实际上不对应）
     var asm__ = (asm_ + '\n')
         .replace(/\r\n/g, '\n')
         .replace(/#(.*)\n/g, '\n')
