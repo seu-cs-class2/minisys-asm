@@ -358,7 +358,7 @@ function parseTextSeg(asm_, lineno) {
  */
 function parseOneLine(asm, lineno) {
     // 处理助记符
-    utils_1.assert(/^\s*(\w+)\s+(.*)/.test(asm), "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF0C\u5728\u4EE3\u7801\u7B2C " + lineno + " \u884C\u3002");
+    utils_1.assert(/^\s*(\w+)\s*(.*)/.test(asm), "\u6CA1\u6709\u627E\u5230\u6307\u4EE4\u52A9\u8BB0\u7B26\uFF0C\u5728\u4EE3\u7801\u7B2C " + lineno + " \u884C\u3002");
     var symbol = RegExp.$1;
     // 检验助记符合法性
     var instructionIndex = instruction_1.MinisysInstructions.findIndex(function (x) { return x.symbol == symbol; });

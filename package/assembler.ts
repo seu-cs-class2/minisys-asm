@@ -389,7 +389,7 @@ function parseTextSeg(asm_: string[], lineno: number[]) {
  */
 export function parseOneLine(asm: string, lineno: number) {
   // 处理助记符
-  assert(/^\s*(\w+)\s+(.*)/.test(asm), `没有找到指令助记符，在代码第 ${lineno} 行。`)
+  assert(/^\s*(\w+)\s*(.*)/.test(asm), `没有找到指令助记符，在代码第 ${lineno} 行。`)
   const symbol = RegExp.$1
   // 检验助记符合法性
   const instructionIndex = MinisysInstructions.findIndex(x => x.symbol == symbol)
