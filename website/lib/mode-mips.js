@@ -32,7 +32,7 @@ var MIPSHighlightRules = function() {
         }, {
             token: "support.function.source.mips",
             // NOTE: added mfc0 / mtc0 / nop / push / pop ... etc. for Minisys by z0gSh1u
-            regex: /\b(?:add|addu|addi|addiu|sub|subu|and|andi|or|not|ori|nor|xor|xori|slt|sltu|slti|sltiu|sll|sllv|rol|srl|sra|srlv|ror|j|jr|jal|beq|bne|lw|sw|lb|sb|lui|move|mfhi|mflo|mthi|mtlo|mfc0|mtc0|nop|push|pop|jl|jle|jg|jge)\b/,
+            regex: /\b(?:add|addu|addi|addiu|sub|subu|and|andi|or|not|ori|nor|xor|xori|slt|sltu|slti|sltiu|sll|sllv|rol|srl|sra|srlv|ror|j|jr|jal|jalr|beq|bne|lw|sw|lb|lbu|lh|lhu|sh|sb|lui|move|mfhi|mflo|mthi|mtlo|mfc0|mtc0|nop|push|pop|jl|jle|jg|jge|bgez|bgtz|blez|bltz|bgezal|bltzal|break)\b/,
             comment: "Just the hardcoded instructions provided by the MIPS assembly language"
         }, {
             token: "support.function.other.mips",
