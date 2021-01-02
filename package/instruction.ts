@@ -592,7 +592,7 @@ export const MinisysInstructions: Instruction[] = (function () {
   ])
 
   newInstruction('bltz', '小于0分支', 'if ((rs)＜0) then (PC)←(PC)+4+((Sign-Extend) offset<<2)', paramPattern(2), [
-    [31, 26, 'op', noop, 'fixed', '000111'],
+    [31, 26, 'op', noop, 'fixed', '000001'],
     [25, 21, 'rs', () => regToBin(RegExp.$1), 'reg', ''],
     [20, 16, 'rt', noop, 'fixed', '00000'],
     [15, 0, 'offset', () => labelToBin(RegExp.$2, 18, true, true).slice(-18, -2), 'offset', ''],
