@@ -62,4 +62,8 @@ export const expansionRules: { [key: string]: MacroExpansionRule } = {
       'addi $sp, $sp, 4',
     ],
   },
+  move: {
+    pattern: /^move\s+(\$\w{1,2}),\s+(\$\w{1,2})$/i,
+    replacer: () => [`or ${RegExp.$1}, ${RegExp.$2}, $zero`],
+  },
 }
