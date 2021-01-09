@@ -19,4 +19,10 @@ describe('macro.ts', () => {
       'addi $sp, $sp, 4',
     ])
   })
+
+  test('MOVE指令展开正确', () => {
+    const rule = expansionRules['move']
+    rule.pattern.test('move $v0, $2')
+    expect(rule.replacer()).toEqual(['or $v0, $2, $zero'])
+  })
 })

@@ -59,5 +59,9 @@ exports.expansionRules = {
             'addi $sp, $sp, 4',
         ]; },
     },
+    move: {
+        pattern: /^move\s+(\$\w{1,2}),\s+(\$\w{1,2})$/i,
+        replacer: function () { return ["or " + RegExp.$1 + ", " + RegExp.$2 + ", $zero"]; },
+    },
 };
 //# sourceMappingURL=macro.js.map
