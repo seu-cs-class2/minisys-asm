@@ -371,85 +371,85 @@ exports.MinisysInstructions = (function () {
         [31, 26, 'op', noop, 'fixed', '001000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16, true); }, 'immed', ''],
+        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16, true).slice(-16); }, 'immed', ''],
     ]);
     newInstruction('addiu', '无符号加立即数', '(rt)←(rs)+(sign-extend)immediate', paramPattern(3), [
         [31, 26, 'op', noop, 'fixed', '001001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16, true); }, 'immed', ''],
+        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16, true).slice(-16); }, 'immed', ''],
     ]);
     newInstruction('andi', '按位与立即数', '(rt)←(rs)&(zero-extend)immediate', paramPattern(3), [
         [31, 26, 'op', noop, 'fixed', '001100'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
+        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16).slice(-16); }, 'immed', ''],
     ]);
     newInstruction('ori', '按位或立即数', '(rt)←(rs)|(zero-extend)immediate', paramPattern(3), [
         [31, 26, 'op', noop, 'fixed', '001101'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
+        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16).slice(-16); }, 'immed', ''],
     ]);
     newInstruction('xori', '按位异或立即数', '(rt)←(rs)^(zero-extend)immediate', paramPattern(3), [
         [31, 26, 'op', noop, 'fixed', '001110'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$2); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16); }, 'immed', ''],
+        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$3, 16).slice(-16); }, 'immed', ''],
     ]);
     newInstruction('lui', '取立即数高16位', '(rt)←immediate<<16 & 0FFFF0000H', paramPattern(2), [
         [31, 26, 'op', noop, 'fixed', '001111'],
         [25, 21, 'rs', noop, 'fixed', '00000'],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$2, 16, true); }, 'immed', ''],
+        [15, 0, 'immediate', function () { return utils_1.literalToBin(RegExp.$2, 16, true).slice(-16); }, 'immed', ''],
     ]);
     newInstruction('lb', '取字节', '(rt)←(Sign-Extend)Memory[(rs)+(sign_extend)offset]', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
         [31, 26, 'op', noop, 'fixed', '100000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true).slice(-16); }, 'offset', ''],
     ]);
     newInstruction('lbu', '取无符号字节', '(rt)←(Zero-Extend)Memory[(rs)+(sign_extend)offset]', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
         [31, 26, 'op', noop, 'fixed', '100100'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true).slice(-16); }, 'offset', ''],
     ]);
     newInstruction('lh', '取半字', '(rt)←(Sign-Extend)Memory[(rs)+(sign_extend)offset]', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
         [31, 26, 'op', noop, 'fixed', '100001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true).slice(-16); }, 'offset', ''],
     ]);
     newInstruction('lhu', '取无符号半字', '(rt)←(Zero-Extend)Memory[(rs)+(sign_extend)offset]', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
         [31, 26, 'op', noop, 'fixed', '100101'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true).slice(-16); }, 'offset', ''],
     ]);
     newInstruction('sb', '存字节', 'Memory[(rs)+(sign_extend)offset]←(rt)7..0', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
         [31, 26, 'op', noop, 'fixed', '101000'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true).slice(-16); }, 'offset', ''],
     ]);
     newInstruction('sh', '存半字', 'Memory[(rs)+(sign_extend)offset]←(rt)15..0', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
         [31, 26, 'op', noop, 'fixed', '101001'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true).slice(-16); }, 'offset', ''],
     ]);
     newInstruction('lw', '取字', '(rt)←Memory[(rs)+(sign_extend)offset]', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
         [31, 26, 'op', noop, 'fixed', '100011'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true).slice(-16); }, 'offset', ''],
     ]);
     newInstruction('sw', '存字', 'Memory[(rs)+(sign_extend)offset]←(rt)', /^([\w$-]+),([\w-]+)\(([\w$-]+)\)$/, [
         [31, 26, 'op', noop, 'fixed', '101011'],
         [25, 21, 'rs', function () { return register_1.regToBin(RegExp.$3); }, 'reg', ''],
         [20, 16, 'rt', function () { return register_1.regToBin(RegExp.$1); }, 'reg', ''],
-        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true); }, 'offset', ''],
+        [15, 0, 'offset', function () { return utils_1.varToAddrBin(RegExp.$2, 16, true).slice(-16); }, 'offset', ''],
     ]);
     newInstruction('beq', '相等分支', 'if ((rt)=(rs)) then (PC)←(PC)+4+((Sign-Extend)offset<<2)', paramPattern(3), [
         [31, 26, 'op', noop, 'fixed', '000100'],
