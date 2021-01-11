@@ -3,7 +3,7 @@
  * by Withod, z0gSh1u @ 2020-10
  */
 
-import { getLabelAddr, getPC, getVarAddr, VarCompType } from './assembler'
+import { userAddrOffset, getLabelAddr, getPC, getVarAddr, VarCompType } from './assembler'
 
 /**
  * Ensure `ensure`, else throw `Error(hint)`.
@@ -23,7 +23,11 @@ export function assert(ensure: unknown, hint?: string) {
  */
 export function labelToBin(label: string, len: number, isOffset: boolean, signExt: boolean = false) {
   try {
-    return literalToBin(label, len, signExt).slice(-len)
+    if (!isOffset) {
+      return decToBin(parseInt(literalToBin(label, len, signExt), 2) + userAddrOffset, len, signExt).slice(-len)
+    } else {
+      return literalToBin(label, len, signExt).slice(-len)
+    }
   } catch (e) {
     return literalToBin((getLabelAddr(label) - (isOffset ? getPC() : 0)).toString(), len, isOffset).slice(-len)
   }

@@ -25,7 +25,12 @@ exports.assert = assert;
 function labelToBin(label, len, isOffset, signExt) {
     if (signExt === void 0) { signExt = false; }
     try {
-        return literalToBin(label, len, signExt).slice(-len);
+        if (!isOffset) {
+            return decToBin(parseInt(literalToBin(label, len, signExt), 2) + assembler_1.userAddrOffset, len, signExt).slice(-len);
+        }
+        else {
+            return literalToBin(label, len, signExt).slice(-len);
+        }
     }
     catch (e) {
         return literalToBin((assembler_1.getLabelAddr(label) - (isOffset ? assembler_1.getPC() : 0)).toString(), len, isOffset).slice(-len);

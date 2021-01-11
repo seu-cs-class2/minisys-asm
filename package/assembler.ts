@@ -17,6 +17,10 @@ const __VarCompType = {
 export type VarCompType = keyof typeof __VarCompType
 const VarCompTypeRegex = Object.keys(__VarCompType).join('|')
 
+// 拼接BIOS后用户程序的地址偏移量
+// TODO: 根据情况赋值此变量
+export let userAddrOffset: number = 0
+
 /**
  * 汇编程序，由数据段和代码段构成
  */
@@ -107,7 +111,7 @@ interface TextSegLabel {
  * 代码段
  */
 export class TextSeg {
-  private _startAddr: string // 开始抵制
+  private _startAddr: string // 开始地址
   private _ins: Instruction[] // 指令
   private _labels: TextSegLabel[] // 标签
 
