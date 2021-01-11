@@ -420,9 +420,9 @@ export const MinisysInstructions: Instruction[] = (function () {
     [5, 0, 'func', noop, 'fixed', '001101'],
   ])
 
-  newInstruction('syscall', '系统调用', '系统调用', paramPattern(1), [
+  newInstruction('syscall', '系统调用', '系统调用', /^([\w$-]+)?$/, [
     [31, 26, 'op', noop, 'fixed', '000000'],
-    [25, 6, 'code', () => literalToBin(RegExp.$1, 20), 'code', ''],
+    [25, 6, 'code', () => literalToBin(RegExp.$1.trim() ? RegExp.$1 : '0', 20), 'code', ''],
     [5, 0, 'func', noop, 'fixed', '001100'],
   ])
 

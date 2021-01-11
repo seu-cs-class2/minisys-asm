@@ -356,9 +356,9 @@ exports.MinisysInstructions = (function () {
         [25, 6, 'code', function () { return utils_1.literalToBin(RegExp.$1, 20); }, 'code', ''],
         [5, 0, 'func', noop, 'fixed', '001101'],
     ]);
-    newInstruction('syscall', '系统调用', '系统调用', paramPattern(1), [
+    newInstruction('syscall', '系统调用', '系统调用', /^([\w$-]+)?$/, [
         [31, 26, 'op', noop, 'fixed', '000000'],
-        [25, 6, 'code', function () { return utils_1.literalToBin(RegExp.$1, 20); }, 'code', ''],
+        [25, 6, 'code', function () { return utils_1.literalToBin(RegExp.$1.trim() ? RegExp.$1 : '0', 20); }, 'code', ''],
         [5, 0, 'func', noop, 'fixed', '001100'],
     ]);
     newInstruction('eret', '从中断或者异常中返回', '从中断或者异常中返回', paramPattern(0), [
