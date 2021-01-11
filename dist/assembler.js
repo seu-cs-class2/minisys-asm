@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.assemble = exports.parseOneLine = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
+exports.assemble = exports.parseOneLine = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = exports.userAddrOffset = void 0;
 var unraw_1 = __importDefault(require("unraw"));
 var instruction_1 = require("./instruction");
 var macro_1 = require("./macro");
@@ -29,6 +29,9 @@ var __VarCompType = {
     byte: void 0, half: void 0, word: void 0, ascii: void 0, space: void 0
 };
 var VarCompTypeRegex = Object.keys(__VarCompType).join('|');
+// 拼接BIOS后用户程序的地址偏移量
+// TODO: 根据情况赋值此变量
+exports.userAddrOffset = 0;
 /**
  * 数据段
  */
