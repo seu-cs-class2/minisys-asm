@@ -405,9 +405,9 @@ function assemble(asm_) {
     // 挑出代码段和数据段
     var dataSegStartLine = asm.findIndex(function (v) { return v.match(/\.data/); });
     var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text/); });
-    utils_1.assert(dataSegStartLine !== -1, '未找到数据段开始。');
-    utils_1.assert(textSegStartLine !== -1, '未找到代码段开始。');
-    utils_1.assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后。');
+    utils_1.assert(dataSegStartLine !== -1, '未找到数据段开始');
+    utils_1.assert(textSegStartLine !== -1, '未找到代码段开始');
+    utils_1.assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后');
     // 解析数据段
     var dataSeg = parseDataSeg(asm.slice(dataSegStartLine, textSegStartLine));
     // 解析代码段

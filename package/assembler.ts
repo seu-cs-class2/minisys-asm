@@ -435,9 +435,9 @@ export function assemble(asm_: string) {
   // 挑出代码段和数据段
   const dataSegStartLine = asm.findIndex(v => v.match(/\.data/))
   const textSegStartLine = asm.findIndex(v => v.match(/\.text/))
-  assert(dataSegStartLine !== -1, '未找到数据段开始。')
-  assert(textSegStartLine !== -1, '未找到代码段开始。')
-  assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后。')
+  assert(dataSegStartLine !== -1, '未找到数据段开始')
+  assert(textSegStartLine !== -1, '未找到代码段开始')
+  assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后')
 
   // 解析数据段
   const dataSeg = parseDataSeg(asm.slice(dataSegStartLine, textSegStartLine))

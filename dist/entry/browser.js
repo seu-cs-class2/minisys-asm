@@ -64,10 +64,24 @@ function assemble(asmCode, link) {
         return assembler_1.assemble(asmCode);
     }
     else {
-        var all = assembler_1.assemble('.data\n.text\n' + linker_1.linkAll(minisys_bios_asm_1.default, asmCode, minisys_interrupt_entry_asm_1.default, minisys_interrupt_handler_asm_1.default));
-        var textSeg = all.textSeg;
-        var dataSeg = assembler_1.assemble(asmCode).dataSeg;
-        return { textSeg: textSeg, dataSeg: dataSeg };
+        var asm = (asmCode + '\n')
+            .replace(/\r\n/g, '\n')
+            .replace(/#(.*)\n/g, '\n')
+            .split('\n');
+        // 挑出代码段和数据段
+        var dataSegStartLine = asm.findIndex(function (v) { return v.match(/\.data/); });
+        var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text/); });
+        utils_1.assert(dataSegStartLine !== -1, '未找到数据段开始');
+        utils_1.assert(textSegStartLine !== -1, '未找到代码段开始');
+        utils_1.assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后');
+        // 链接完成后汇编
+        var allProgram = asm.slice(dataSegStartLine, textSegStartLine).join('\n') +
+            '\n' +
+            '.text\n' +
+            linker_1.linkAll(minisys_bios_asm_1.default, asm.slice(textSegStartLine + 1).join('\n'), minisys_interrupt_entry_asm_1.default, minisys_interrupt_handler_asm_1.default);
+        $('#link-result').value = allProgram;
+        var all = assembler_1.assemble(allProgram);
+        return all;
     }
 }
 /**

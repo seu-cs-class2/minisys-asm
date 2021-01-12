@@ -40,14 +40,6 @@ function linkAll(biosASM, userASM, intEntryASM, intHandlerASM) {
     utils_1.assert(biosASMInsCount <= 320, 'BIOS 程序段过长。');
     var biosNopPadding = 320 - biosASMInsCount;
     // User App 0x00000500 ~ 0x00005499
-    var userASM_ = (userASM + '\n')
-        .replace(/\r\n/g, '\n')
-        .replace(/#(.*)\n/g, '\n')
-        .split('\n');
-    var textSegStartLine = userASM_.findIndex(function (v) { return v.match(/\.text/); });
-    utils_1.assert(textSegStartLine !== -1, '未找到代码段开始。');
-    userASM_ = userASM_.slice(textSegStartLine + 1);
-    userASM = userASM_.join('\n');
     var userASMInsCount = countIns(userASM);
     utils_1.assert(userASMInsCount <= 5120, '用户程序段过长。');
     var userNopPadding = 5120 - userASMInsCount;

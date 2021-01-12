@@ -26,8 +26,16 @@
         </div>
         <div class="result">
           <label for="hexSwitch"><input type="checkbox" id="hexSwitch" value="hex">&nbsp;十六进制表示</label>
-          <p>代码段汇编结果：</p>
-          <textarea rows="25" id="asm-result" readonly></textarea>
+          <div class="result-container">
+            <div id="asm-result-container">
+              <p>代码段汇编结果：</p>
+              <textarea rows="25" id="asm-result" readonly></textarea>
+            </div>
+            <div id="link-result-container">
+              <p>链接结果：</p>
+              <textarea rows="32" id="link-result" readonly></textarea>
+            </div>
+          </div>
         </div>
         <div class="ops">
           <span id="asm-lastModified"></span>

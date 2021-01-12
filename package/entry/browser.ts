@@ -7,9 +7,9 @@
 /// <reference path="../typing/shims.d.ts" />
 
 import { Ace } from '../typing/ace'
-import { AsmProgram, assemble as _assemble } from '../assembler'
+import { AsmProgram, assemble as _assemble, parseDataSeg } from '../assembler'
 import { coeToTxt, dataSegToCoe, textSegToCoe } from '../convert'
-import { binToHex, hexToBin } from '../utils'
+import { assert, binToHex, hexToBin } from '../utils'
 
 import _MinisysBIOS from '../snippet/minisys-bios.asm'
 import _MinisysIntEntry from '../snippet/minisys-interrupt-entry.asm'
@@ -68,10 +68,25 @@ function assemble(asmCode: string, link: boolean): AsmProgram {
   if (!link) {
     return _assemble(asmCode)
   } else {
-    const all = _assemble('.data\n.text\n' + linkAll(_MinisysBIOS, asmCode, _MinisysIntEntry, _MinisysIntHandler))
-    const textSeg = all.textSeg
-    const dataSeg = _assemble(asmCode).dataSeg
-    return { textSeg, dataSeg }
+    let asm = (asmCode + '\n')
+      .replace(/\r\n/g, '\n')
+      .replace(/#(.*)\n/g, '\n')
+      .split('\n')
+    // 挑出代码段和数据段
+    const dataSegStartLine = asm.findIndex(v => v.match(/\.data/))
+    const textSegStartLine = asm.findIndex(v => v.match(/\.text/))
+    assert(dataSegStartLine !== -1, '未找到数据段开始')
+    assert(textSegStartLine !== -1, '未找到代码段开始')
+    assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后')
+    // 链接完成后汇编
+    const allProgram =
+      asm.slice(dataSegStartLine, textSegStartLine).join('\n') +
+      '\n' +
+      '.text\n' +
+      linkAll(_MinisysBIOS, asm.slice(textSegStartLine + 1).join('\n'), _MinisysIntEntry, _MinisysIntHandler)
+    $<HTMLTextAreaElement>('#link-result').value = allProgram
+    const all = _assemble(allProgram)
+    return all
   }
 }
 

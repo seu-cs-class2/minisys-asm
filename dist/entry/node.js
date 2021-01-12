@@ -12,6 +12,7 @@ var path_1 = __importDefault(require("path"));
 var assembler_1 = require("../assembler");
 var convert_1 = require("../convert");
 var linker_1 = require("../linker");
+var utils_1 = require("../utils");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 var args = require('minimist')(process.argv.slice(2));
 // args looks like { _: [ 'example/md.l' ], v: true }
@@ -48,14 +49,29 @@ else {
             .readFileSync(path_1.default.join(__dirname, '../snippet/minisys-interrupt-handler.asm'))
             .toString();
         // 把链接后的代码段进行汇编
-        var all = assembler_1.assemble('.data\n.text\n' + linker_1.linkAll(biosContent, userAppASM, intEntryContent, intHandlerContent));
+        var asm = (userAppASM + '\n')
+            .replace(/\r\n/g, '\n')
+            .replace(/#(.*)\n/g, '\n')
+            .split('\n');
+        // 挑出代码段和数据段
+        var dataSegStartLine = asm.findIndex(function (v) { return v.match(/\.data/); });
+        var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text/); });
+        utils_1.assert(dataSegStartLine !== -1, '未找到数据段开始');
+        utils_1.assert(textSegStartLine !== -1, '未找到代码段开始');
+        utils_1.assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后');
+        // 链接完成后汇编
+        var allProgram = asm.slice(dataSegStartLine, textSegStartLine).join('\n') +
+            '\n' +
+            '.text\n' +
+            linker_1.linkAll(biosContent, asm.slice(textSegStartLine + 1).join('\n'), intEntryContent, intHandlerContent);
+        var all = assembler_1.assemble(allProgram);
         var textCoe = convert_1.textSegToCoe(all.textSeg);
+        var dataCoe = convert_1.dataSegToCoe(all.dataSeg);
+        // 输出
         fs_1.default.writeFileSync(path_1.default.join(outDir, 'prgmip32.coe'), textCoe);
-        // 处理数据段
-        var asmResult = assembler_1.assemble(userAppASM);
-        var dataCoe = convert_1.dataSegToCoe(asmResult.dataSeg);
         fs_1.default.writeFileSync(path_1.default.join(outDir, 'dmem32.coe'), dataCoe);
         fs_1.default.writeFileSync(path_1.default.join(outDir, 'serial.txt'), convert_1.coeToTxt(textCoe, dataCoe));
+        fs_1.default.writeFileSync(path_1.default.join(outDir, 'linked.asm'), allProgram);
         stdoutPrint('[minisys-asm] Assembling done with linking.');
     }
 }

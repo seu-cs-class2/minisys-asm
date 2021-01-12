@@ -8,6 +8,7 @@ import path from 'path'
 import { assemble } from '../assembler'
 import { coeToTxt, dataSegToCoe, textSegToCoe } from '../convert'
 import { linkAll } from '../linker'
+import { assert } from '../utils'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const args = require('minimist')(process.argv.slice(2))
@@ -45,14 +46,30 @@ if (args._.length === 0 || args._.length !== 2) {
       .readFileSync(path.join(__dirname, '../snippet/minisys-interrupt-handler.asm'))
       .toString()
     // 把链接后的代码段进行汇编
-    const all = assemble('.data\n.text\n' + linkAll(biosContent, userAppASM, intEntryContent, intHandlerContent))
+    let asm = (userAppASM + '\n')
+      .replace(/\r\n/g, '\n')
+      .replace(/#(.*)\n/g, '\n')
+      .split('\n')
+    // 挑出代码段和数据段
+    const dataSegStartLine = asm.findIndex(v => v.match(/\.data/))
+    const textSegStartLine = asm.findIndex(v => v.match(/\.text/))
+    assert(dataSegStartLine !== -1, '未找到数据段开始')
+    assert(textSegStartLine !== -1, '未找到代码段开始')
+    assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后')
+    // 链接完成后汇编
+    const allProgram =
+      asm.slice(dataSegStartLine, textSegStartLine).join('\n') +
+      '\n' +
+      '.text\n' +
+      linkAll(biosContent, asm.slice(textSegStartLine + 1).join('\n'), intEntryContent, intHandlerContent)
+    const all = assemble(allProgram)
     const textCoe = textSegToCoe(all.textSeg)
+    const dataCoe = dataSegToCoe(all.dataSeg)
+    // 输出
     fs.writeFileSync(path.join(outDir, 'prgmip32.coe'), textCoe)
-    // 处理数据段
-    const asmResult = assemble(userAppASM)
-    const dataCoe = dataSegToCoe(asmResult.dataSeg)
     fs.writeFileSync(path.join(outDir, 'dmem32.coe'), dataCoe)
     fs.writeFileSync(path.join(outDir, 'serial.txt'), coeToTxt(textCoe, dataCoe))
+    fs.writeFileSync(path.join(outDir, 'linked.asm'), allProgram)
     stdoutPrint('[minisys-asm] Assembling done with linking.')
   }
 }

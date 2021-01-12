@@ -40,14 +40,6 @@ export function linkAll(biosASM: string, userASM: string, intEntryASM: string, i
   const biosNopPadding = 320 - biosASMInsCount
 
   // User App 0x00000500 ~ 0x00005499
-  let userASM_ = (userASM + '\n')
-    .replace(/\r\n/g, '\n')
-    .replace(/#(.*)\n/g, '\n')
-    .split('\n')
-  const textSegStartLine = userASM_.findIndex(v => v.match(/\.text/))
-  assert(textSegStartLine !== -1, '未找到代码段开始。')
-  userASM_ = userASM_.slice(textSegStartLine + 1)
-  userASM = userASM_.join('\n')
   const userASMInsCount = countIns(userASM)
   assert(userASMInsCount <= 5120, '用户程序段过长。')
   const userNopPadding = 5120 - userASMInsCount
