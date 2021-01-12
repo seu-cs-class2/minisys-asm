@@ -17,9 +17,6 @@ const __VarCompType = {
 export type VarCompType = keyof typeof __VarCompType
 const VarCompTypeRegex = Object.keys(__VarCompType).join('|')
 
-// 拼接BIOS后用户程序的地址偏移量
-export let userAddrOffset: number = 1280
-
 /**
  * 汇编程序，由数据段和代码段构成
  */

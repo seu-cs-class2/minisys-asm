@@ -23,7 +23,10 @@ if (args._.length === 0 || args._.length !== 2) {
   const inFile = args._[0]
   const outDir = args._[1]
   const link = !!args.l
-
+  // @ts-ignore
+  globalThis._minisys = {
+    _userAppOffset: link ? 1280 : 0,
+  }
   if (!link) {
     const asmCode = fs.readFileSync(inFile).toString('utf-8').replace(/\r\n/g, '\n').trim()
     const asmResult = assemble(asmCode)

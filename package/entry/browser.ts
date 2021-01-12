@@ -81,6 +81,10 @@ function assemble(asmCode: string, link: boolean): AsmProgram {
 function assembleBrowser() {
   const asmCode = editor.getValue()
   const link = $<HTMLInputElement>('#linkSwitch').checked
+  // @ts-ignore
+  globalThis._minisys = {
+    _userAppOffset: link ? 1280 : 0,
+  }
   try {
     const result = assemble(asmCode, link)
     const binary = result.textSeg.toBinary()
@@ -123,6 +127,10 @@ window.addEventListener('load', () => {
   $<HTMLButtonElement>('#asm-assemble').onclick = assembleBrowser
   $<HTMLButtonElement>('#asm-download-coe').onclick = () => {
     const link = $<HTMLInputElement>('#linkSwitch').checked
+    // @ts-ignore
+    globalThis._minisys = {
+      _userAppOffset: link ? 1280 : 0,
+    }
     try {
       const result = assemble(editor.getValue(), link)
       downloadFile(dataSegToCoe(result.dataSeg), 'dmem32.coe')
@@ -135,6 +143,10 @@ window.addEventListener('load', () => {
   }
   $<HTMLButtonElement>('#asm-download-txt').onclick = () => {
     const link = $<HTMLInputElement>('#linkSwitch').checked
+    // @ts-ignore
+    globalThis._minisys = {
+      _userAppOffset: link ? 1280 : 0,
+    }
     try {
       const result = assemble(editor.getValue(), link)
       const dataCoe = dataSegToCoe(result.dataSeg)

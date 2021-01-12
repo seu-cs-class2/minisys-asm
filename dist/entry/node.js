@@ -25,6 +25,10 @@ else {
     var inFile = args._[0];
     var outDir = args._[1];
     var link = !!args.l;
+    // @ts-ignore
+    globalThis._minisys = {
+        _userAppOffset: link ? 1280 : 0,
+    };
     if (!link) {
         var asmCode = fs_1.default.readFileSync(inFile).toString('utf-8').replace(/\r\n/g, '\n').trim();
         var asmResult = assembler_1.assemble(asmCode);

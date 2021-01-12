@@ -10,6 +10,7 @@ const path = require('path')
 const DIST_PATH = path.join(__dirname, '../dist')
 
 function rmrf(_path) {
+  if (!fs.existsSync(DIST_PATH)) return
   let files
   try {
     files = fs.readdirSync(_path)

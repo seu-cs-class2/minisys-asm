@@ -3,7 +3,7 @@
  * by Withod, z0gSh1u @ 2020-10
  */
 
-import { userAddrOffset, getLabelAddr, getPC, getVarAddr, VarCompType } from './assembler'
+import { getLabelAddr, getPC, getVarAddr, VarCompType } from './assembler'
 
 export class SeuError extends Error {}
 
@@ -26,7 +26,12 @@ export function assert(ensure: unknown, hint?: string) {
 export function labelToBin(label: string, len: number, isOffset: boolean, signExt: boolean = false) {
   try {
     if (!isOffset) {
-      return decToBin(parseInt(literalToBin(label, len, signExt), 2) + userAddrOffset, len, signExt).slice(-len)
+      return decToBin(
+        // @ts-ignore
+        parseInt(literalToBin(label, len, signExt), 2) + (globalThis?._minisys?._userAppOffset || 0),
+        len,
+        signExt
+      ).slice(-len)
     } else {
       return literalToBin(label, len, signExt).slice(-len)
     }

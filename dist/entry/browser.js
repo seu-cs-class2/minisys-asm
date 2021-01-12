@@ -76,6 +76,10 @@ function assemble(asmCode, link) {
 function assembleBrowser() {
     var asmCode = editor.getValue();
     var link = $('#linkSwitch').checked;
+    // @ts-ignore
+    globalThis._minisys = {
+        _userAppOffset: link ? 1280 : 0,
+    };
     try {
         var result = assemble(asmCode, link);
         var binary = result.textSeg.toBinary();
@@ -118,6 +122,10 @@ window.addEventListener('load', function () {
     $('#asm-assemble').onclick = assembleBrowser;
     $('#asm-download-coe').onclick = function () {
         var link = $('#linkSwitch').checked;
+        // @ts-ignore
+        globalThis._minisys = {
+            _userAppOffset: link ? 1280 : 0,
+        };
         try {
             var result = assemble(editor.getValue(), link);
             downloadFile(convert_1.dataSegToCoe(result.dataSeg), 'dmem32.coe');
@@ -131,6 +139,10 @@ window.addEventListener('load', function () {
     };
     $('#asm-download-txt').onclick = function () {
         var link = $('#linkSwitch').checked;
+        // @ts-ignore
+        globalThis._minisys = {
+            _userAppOffset: link ? 1280 : 0,
+        };
         try {
             var result = assemble(editor.getValue(), link);
             var dataCoe = convert_1.dataSegToCoe(result.dataSeg);

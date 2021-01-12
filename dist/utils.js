@@ -44,10 +44,13 @@ exports.assert = assert;
  * @param signExt 转换后位数不足时是否进行符号扩展，默认采用零扩展
  */
 function labelToBin(label, len, isOffset, signExt) {
+    var _a;
     if (signExt === void 0) { signExt = false; }
     try {
         if (!isOffset) {
-            return decToBin(parseInt(literalToBin(label, len, signExt), 2) + assembler_1.userAddrOffset, len, signExt).slice(-len);
+            return decToBin(
+            // @ts-ignore
+            parseInt(literalToBin(label, len, signExt), 2) + (((_a = globalThis === null || globalThis === void 0 ? void 0 : globalThis._minisys) === null || _a === void 0 ? void 0 : _a._userAppOffset) || 0), len, signExt).slice(-len);
         }
         else {
             return literalToBin(label, len, signExt).slice(-len);
