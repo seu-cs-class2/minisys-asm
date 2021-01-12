@@ -18,13 +18,12 @@ export type VarCompType = keyof typeof __VarCompType
 const VarCompTypeRegex = Object.keys(__VarCompType).join('|')
 
 // 拼接BIOS后用户程序的地址偏移量
-// TODO: 根据情况赋值此变量
-export let userAddrOffset: number = 0
+export let userAddrOffset: number = 1280
 
 /**
  * 汇编程序，由数据段和代码段构成
  */
-interface AsmProgram {
+export interface AsmProgram {
   dataSeg: DataSeg
   textSeg: TextSeg
 }
@@ -175,7 +174,7 @@ export function getPC() {
  * 解析数据段
  * @param asm 从.data开始，到.text的前一行
  */
-function parseDataSeg(asm: string[]) {
+export function parseDataSeg(asm: string[]) {
   // 解析初始化值
   const parseInitValue = (type: VarCompType, init: string) => {
     assert(!(type !== 'ascii' && init.includes('"')), '字符串型数据只能使用.ascii类型')
@@ -319,7 +318,7 @@ function parseDataSeg(asm: string[]) {
 /**
  * 展开代码段宏指令
  */
-function expandMacros(asm_: string[], lineno_: number[]) {
+export function expandMacros(asm_: string[], lineno_: number[]) {
   let asm = Array.from(asm_)
   let ruleIdx = -1
   const macros = Object.keys(expansionRules)
@@ -346,7 +345,7 @@ function expandMacros(asm_: string[], lineno_: number[]) {
  * 解析代码段
  * @param asm .text起，到代码段结束
  */
-function parseTextSeg(asm_: string[], lineno: number[]) {
+export function parseTextSeg(asm_: string[], lineno: number[]) {
   // 先展开宏指令
   let asm = expandMacros(asm_, lineno)
   // 确定数据段起始地址

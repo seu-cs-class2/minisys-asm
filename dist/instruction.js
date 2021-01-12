@@ -525,4 +525,3 @@ exports.MinisysInstructions = (function () {
     return _MinisysInstructions;
 })();
 var templateObject_1;
-//# sourceMappingURL=instruction.js.map

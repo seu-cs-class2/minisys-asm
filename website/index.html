@@ -25,12 +25,13 @@
           <p id="asm-failTrace"></p>
         </div>
         <div class="result">
-          <label for="hexSwitch"><input type="checkbox" id="hexSwitch" value="hex">十六进制表示</label>
+          <label for="hexSwitch"><input type="checkbox" id="hexSwitch" value="hex">&nbsp;十六进制表示</label>
           <p>代码段汇编结果：</p>
           <textarea rows="25" id="asm-result" readonly></textarea>
         </div>
         <div class="ops">
           <span id="asm-lastModified"></span>
+          <label for="linkSwitch"><input type="checkbox" id="linkSwitch" value="link">&nbsp;链接BIOS和中断处理&nbsp;</label>
           <button class="button button-3d button-primary button-rounded" id="asm-assemble">汇编！</button>
           <button class="button button-3d button-action button-rounded" id="asm-download-coe">下载.coe文件</button>
           <button class="button button-3d button-highlight button-rounded" id="asm-download-txt">下载串口流文件</button>

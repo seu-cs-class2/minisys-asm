@@ -31,4 +31,4 @@ function rmrf(_path) {
 rmrf(DIST_PATH)
 fs.mkdirSync(DIST_PATH)
 
-console.log(`[Clean] Task finished.`)
+console.log(`Clean Task finished.`)

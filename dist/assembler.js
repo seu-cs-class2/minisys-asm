@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.assemble = exports.parseOneLine = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = exports.userAddrOffset = void 0;
+exports.assemble = exports.parseOneLine = exports.parseTextSeg = exports.expandMacros = exports.parseDataSeg = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = exports.userAddrOffset = void 0;
 var unraw_1 = __importDefault(require("unraw"));
 var instruction_1 = require("./instruction");
 var macro_1 = require("./macro");
@@ -30,8 +30,7 @@ var __VarCompType = {
 };
 var VarCompTypeRegex = Object.keys(__VarCompType).join('|');
 // 拼接BIOS后用户程序的地址偏移量
-// TODO: 根据情况赋值此变量
-exports.userAddrOffset = 0;
+exports.userAddrOffset = 1280;
 /**
  * 数据段
  */
@@ -290,6 +289,7 @@ function parseDataSeg(asm) {
     }
     return new DataSeg(startAddr, vars);
 }
+exports.parseDataSeg = parseDataSeg;
 /**
  * 展开代码段宏指令
  */
@@ -315,6 +315,7 @@ function expandMacros(asm_, lineno_) {
     });
     return asm;
 }
+exports.expandMacros = expandMacros;
 /**
  * 解析代码段
  * @param asm .text起，到代码段结束
@@ -356,6 +357,7 @@ function parseTextSeg(asm_, lineno) {
     });
     return new TextSeg(startAddr, ins, labels);
 }
+exports.parseTextSeg = parseTextSeg;
 /**
  * 解析单行汇编到Instruction对象
  */
@@ -419,4 +421,3 @@ function assemble(asm_) {
 }
 exports.assemble = assemble;
 var templateObject_1, templateObject_2;
-//# sourceMappingURL=assembler.js.map

@@ -5,12 +5,14 @@
 
 import { userAddrOffset, getLabelAddr, getPC, getVarAddr, VarCompType } from './assembler'
 
+export class SeuError extends Error {}
+
 /**
- * Ensure `ensure`, else throw `Error(hint)`.
+ * Ensure `ensure`, else throw `SeuError(hint)`.
  */
 export function assert(ensure: unknown, hint?: string) {
   if (!ensure) {
-    throw new Error(hint)
+    throw new SeuError(hint)
   }
 }
 

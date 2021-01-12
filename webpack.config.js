@@ -19,6 +19,11 @@ module.exports = {
         loader: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.asm$/,
+        loader: 'raw-loader',
+        exclude: /node_modules/
+      }
     ],
   },
   resolve: {

@@ -8,4 +8,3 @@ var asm = "\n.DATA 0x100000\nbuf: .WORD 0x000000ff, 0x55005500\nbuf2: .byte 1\n 
 var res = assembler_1.assemble(asm);
 console.log(res);
 // fs.writeFileSync('./res.json', JSON.stringify(res, null, 2))
-//# sourceMappingURL=playground.js.map

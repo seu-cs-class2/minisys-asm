@@ -36,4 +36,3 @@ function regToBin(reg) {
     return utils_1.decToBin(regNumber, 5);
 }
 exports.regToBin = regToBin;
-//# sourceMappingURL=register.js.map

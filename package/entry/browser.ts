@@ -4,10 +4,17 @@
  */
 
 /// <reference path="../typing/ace.d.ts" />
+/// <reference path="../typing/shims.d.ts" />
+
 import { Ace } from '../typing/ace'
-import { assemble } from '../assembler'
+import { AsmProgram, assemble as _assemble } from '../assembler'
 import { coeToTxt, dataSegToCoe, textSegToCoe } from '../convert'
 import { binToHex, hexToBin } from '../utils'
+
+import _MinisysBIOS from '../snippet/minisys-bios.asm'
+import _MinisysIntEntry from '../snippet/minisys-interrupt-entry.asm'
+import _MinisysIntHandler from '../snippet/minisys-interrupt-handler.asm'
+import { linkAll } from '../linker'
 
 const lastModifiedInfo = '' // 页面提示语
 
@@ -45,9 +52,26 @@ function setStatus(to: 'success' | 'fail', trace?: string) {
  */
 function assembleResultSwitch(res: string) {
   if ($<HTMLInputElement>('#hexSwitch').checked) {
-    return res.split('\n').map(binaryLine => binToHex(binaryLine, false)).join('\n')
+    return res
+      .split('\n')
+      .map(binaryLine => binToHex(binaryLine, false))
+      .join('\n')
   } else {
-    return res.split('\n').map(binaryLine => hexToBin(binaryLine)).join('\n')
+    return res
+      .split('\n')
+      .map(binaryLine => hexToBin(binaryLine))
+      .join('\n')
+  }
+}
+
+function assemble(asmCode: string, link: boolean): AsmProgram {
+  if (!link) {
+    return _assemble(asmCode)
+  } else {
+    const all = _assemble('.data\n.text\n' + linkAll(_MinisysBIOS, asmCode, _MinisysIntEntry, _MinisysIntHandler))
+    const textSeg = all.textSeg
+    const dataSeg = _assemble(asmCode).dataSeg
+    return { textSeg, dataSeg }
   }
 }
 
@@ -56,8 +80,9 @@ function assembleResultSwitch(res: string) {
  */
 function assembleBrowser() {
   const asmCode = editor.getValue()
+  const link = $<HTMLInputElement>('#linkSwitch').checked
   try {
-    const result = assemble(asmCode)
+    const result = assemble(asmCode, link)
     const binary = result.textSeg.toBinary()
     if ($<HTMLInputElement>('#hexSwitch').checked) {
       resultDOM.value = assembleResultSwitch(binary)
@@ -97,8 +122,9 @@ window.addEventListener('load', () => {
   // 按钮处理逻辑
   $<HTMLButtonElement>('#asm-assemble').onclick = assembleBrowser
   $<HTMLButtonElement>('#asm-download-coe').onclick = () => {
+    const link = $<HTMLInputElement>('#linkSwitch').checked
     try {
-      const result = assemble(editor.getValue())
+      const result = assemble(editor.getValue(), link)
       downloadFile(dataSegToCoe(result.dataSeg), 'dmem32.coe')
       downloadFile(textSegToCoe(result.textSeg), 'prgmip32.coe')
       setStatus('success')
@@ -108,8 +134,9 @@ window.addEventListener('load', () => {
     }
   }
   $<HTMLButtonElement>('#asm-download-txt').onclick = () => {
+    const link = $<HTMLInputElement>('#linkSwitch').checked
     try {
-      const result = assemble(editor.getValue())
+      const result = assemble(editor.getValue(), link)
       const dataCoe = dataSegToCoe(result.dataSeg)
       const textCoe = textSegToCoe(result.textSeg)
       downloadFile(coeToTxt(textCoe, dataCoe), 'serial.txt')
