@@ -13,6 +13,7 @@ import { assert } from '../utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const args = require('minimist')(process.argv.slice(2))
 // args looks like { _: [ 'example/md.l' ], v: true }
+const jOffset = 1280
 
 function stdoutPrint(content: string) {
   process.stdout.write(content)
@@ -26,7 +27,7 @@ if (args._.length === 0 || args._.length !== 2) {
   const link = !!args.l
   // @ts-ignore
   globalThis._minisys = {
-    _userAppOffset: link ? 1280 : 0,
+    _userAppOffset: link ? jOffset : 0,
   }
   if (!link) {
     const asmCode = fs.readFileSync(inFile).toString('utf-8').replace(/\r\n/g, '\n').trim()
@@ -70,6 +71,6 @@ if (args._.length === 0 || args._.length !== 2) {
     fs.writeFileSync(path.join(outDir, 'dmem32.coe'), dataCoe)
     fs.writeFileSync(path.join(outDir, 'serial.txt'), coeToTxt(textCoe, dataCoe))
     fs.writeFileSync(path.join(outDir, 'linked.asm'), allProgram)
-    stdoutPrint('[minisys-asm] Assembling done with linking.')
+    stdoutPrint(`[minisys-asm] Assembling done with linking. jOffset = ${jOffset} B.`)
   }
 }

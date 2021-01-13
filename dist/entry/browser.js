@@ -14,7 +14,6 @@ var minisys_bios_asm_1 = __importDefault(require("../snippet/minisys-bios.asm"))
 var minisys_interrupt_entry_asm_1 = __importDefault(require("../snippet/minisys-interrupt-entry.asm"));
 var minisys_interrupt_handler_asm_1 = __importDefault(require("../snippet/minisys-interrupt-handler.asm"));
 var linker_1 = require("../linker");
-var lastModifiedInfo = ''; // 页面提示语
 function $(selector) {
     return document.querySelector(selector);
 }
@@ -24,6 +23,8 @@ var statusBgDOM = $('.status');
 var statusDOM = $('#asm-status');
 var traceDOM = $('#asm-failTrace');
 var resultDOM = $('#asm-result');
+var linkResultDOM = $('#link-result');
+var jOffset = +1280;
 /**
  * 修改提示状态
  */
@@ -46,18 +47,10 @@ function setStatus(to, trace) {
  * @param res 原汇编结果
  */
 function assembleResultSwitch(res) {
-    if ($('#hexSwitch').checked) {
-        return res
-            .split('\n')
-            .map(function (binaryLine) { return utils_1.binToHex(binaryLine, false); })
-            .join('\n');
-    }
-    else {
-        return res
-            .split('\n')
-            .map(function (binaryLine) { return utils_1.hexToBin(binaryLine); })
-            .join('\n');
-    }
+    return res
+        .split('\n')
+        .map(function (binaryLine) { return ($('#hexSwitch').checked ? utils_1.binToHex(binaryLine, false) : utils_1.hexToBin(binaryLine)); })
+        .join('\n');
 }
 function assemble(asmCode, link) {
     if (!link) {
@@ -79,7 +72,7 @@ function assemble(asmCode, link) {
             '\n' +
             '.text\n' +
             linker_1.linkAll(minisys_bios_asm_1.default, asm.slice(textSegStartLine + 1).join('\n'), minisys_interrupt_entry_asm_1.default, minisys_interrupt_handler_asm_1.default);
-        $('#link-result').value = allProgram;
+        linkResultDOM.value = allProgram;
         var all = assembler_1.assemble(allProgram);
         return all;
     }
@@ -88,11 +81,13 @@ function assemble(asmCode, link) {
  * 网页端触发汇编
  */
 function assembleBrowser() {
+    resultDOM.value = '';
+    linkResultDOM.value = '';
     var asmCode = editor.getValue();
     var link = $('#linkSwitch').checked;
     // @ts-ignore
     globalThis._minisys = {
-        _userAppOffset: link ? 1280 : 0,
+        _userAppOffset: link ? jOffset : 0,
     };
     try {
         var result = assemble(asmCode, link);
@@ -128,6 +123,7 @@ function downloadFile(content, filename) {
     document.body.removeChild(linkDOM);
 }
 window.addEventListener('load', function () {
+    $('#j-offset').innerHTML = '+' + String(jOffset);
     // 汇编结果进制切换处理逻辑
     $('#hexSwitch').onchange = function () {
         resultDOM.value = assembleResultSwitch(resultDOM.value);
@@ -138,7 +134,7 @@ window.addEventListener('load', function () {
         var link = $('#linkSwitch').checked;
         // @ts-ignore
         globalThis._minisys = {
-            _userAppOffset: link ? 1280 : 0,
+            _userAppOffset: link ? jOffset : 0,
         };
         try {
             var result = assemble(editor.getValue(), link);
@@ -155,7 +151,7 @@ window.addEventListener('load', function () {
         var link = $('#linkSwitch').checked;
         // @ts-ignore
         globalThis._minisys = {
-            _userAppOffset: link ? 1280 : 0,
+            _userAppOffset: link ? jOffset : 0,
         };
         try {
             var result = assemble(editor.getValue(), link);
@@ -169,5 +165,4 @@ window.addEventListener('load', function () {
             console.error(ex);
         }
     };
-    $('#asm-lastModified').innerHTML = lastModifiedInfo;
 });

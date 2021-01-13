@@ -7,7 +7,7 @@
 /// <reference path="../typing/shims.d.ts" />
 
 import { Ace } from '../typing/ace'
-import { AsmProgram, assemble as _assemble, parseDataSeg } from '../assembler'
+import { AsmProgram, assemble as _assemble } from '../assembler'
 import { coeToTxt, dataSegToCoe, textSegToCoe } from '../convert'
 import { assert, binToHex, hexToBin } from '../utils'
 
@@ -15,8 +15,6 @@ import _MinisysBIOS from '../snippet/minisys-bios.asm'
 import _MinisysIntEntry from '../snippet/minisys-interrupt-entry.asm'
 import _MinisysIntHandler from '../snippet/minisys-interrupt-handler.asm'
 import { linkAll } from '../linker'
-
-const lastModifiedInfo = '' // 页面提示语
 
 function $<T>(selector: string): T {
   return (<unknown>document.querySelector(selector)) as T
@@ -27,6 +25,8 @@ const statusBgDOM = $<HTMLDivElement>('.status')
 const statusDOM = $<HTMLSpanElement>('#asm-status')
 const traceDOM = $<HTMLParagraphElement>('#asm-failTrace')
 const resultDOM = $<HTMLTextAreaElement>('#asm-result')
+const linkResultDOM = $<HTMLTextAreaElement>('#link-result')
+const jOffset = +1280
 
 /**
  * 修改提示状态
@@ -51,17 +51,10 @@ function setStatus(to: 'success' | 'fail', trace?: string) {
  * @param res 原汇编结果
  */
 function assembleResultSwitch(res: string) {
-  if ($<HTMLInputElement>('#hexSwitch').checked) {
-    return res
-      .split('\n')
-      .map(binaryLine => binToHex(binaryLine, false))
-      .join('\n')
-  } else {
-    return res
-      .split('\n')
-      .map(binaryLine => hexToBin(binaryLine))
-      .join('\n')
-  }
+  return res
+    .split('\n')
+    .map(binaryLine => ($<HTMLInputElement>('#hexSwitch').checked ? binToHex(binaryLine, false) : hexToBin(binaryLine)))
+    .join('\n')
 }
 
 function assemble(asmCode: string, link: boolean): AsmProgram {
@@ -84,7 +77,7 @@ function assemble(asmCode: string, link: boolean): AsmProgram {
       '\n' +
       '.text\n' +
       linkAll(_MinisysBIOS, asm.slice(textSegStartLine + 1).join('\n'), _MinisysIntEntry, _MinisysIntHandler)
-    $<HTMLTextAreaElement>('#link-result').value = allProgram
+    linkResultDOM.value = allProgram
     const all = _assemble(allProgram)
     return all
   }
@@ -94,11 +87,13 @@ function assemble(asmCode: string, link: boolean): AsmProgram {
  * 网页端触发汇编
  */
 function assembleBrowser() {
+  resultDOM.value = ''
+  linkResultDOM.value = ''
   const asmCode = editor.getValue()
   const link = $<HTMLInputElement>('#linkSwitch').checked
   // @ts-ignore
   globalThis._minisys = {
-    _userAppOffset: link ? 1280 : 0,
+    _userAppOffset: link ? jOffset : 0,
   }
   try {
     const result = assemble(asmCode, link)
@@ -134,6 +129,7 @@ function downloadFile(content: string, filename: string) {
 }
 
 window.addEventListener('load', () => {
+  $<HTMLSpanElement>('#j-offset').innerHTML = '+' + String(jOffset)
   // 汇编结果进制切换处理逻辑
   $<HTMLInputElement>('#hexSwitch').onchange = () => {
     resultDOM.value = assembleResultSwitch(resultDOM.value)
@@ -144,7 +140,7 @@ window.addEventListener('load', () => {
     const link = $<HTMLInputElement>('#linkSwitch').checked
     // @ts-ignore
     globalThis._minisys = {
-      _userAppOffset: link ? 1280 : 0,
+      _userAppOffset: link ? jOffset : 0,
     }
     try {
       const result = assemble(editor.getValue(), link)
@@ -160,7 +156,7 @@ window.addEventListener('load', () => {
     const link = $<HTMLInputElement>('#linkSwitch').checked
     // @ts-ignore
     globalThis._minisys = {
-      _userAppOffset: link ? 1280 : 0,
+      _userAppOffset: link ? jOffset : 0,
     }
     try {
       const result = assemble(editor.getValue(), link)
@@ -173,5 +169,4 @@ window.addEventListener('load', () => {
       console.error(ex)
     }
   }
-  $<HTMLSpanElement>('#asm-lastModified').innerHTML = lastModifiedInfo
 })

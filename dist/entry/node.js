@@ -16,6 +16,7 @@ var utils_1 = require("../utils");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 var args = require('minimist')(process.argv.slice(2));
 // args looks like { _: [ 'example/md.l' ], v: true }
+var jOffset = 1280;
 function stdoutPrint(content) {
     process.stdout.write(content);
 }
@@ -28,7 +29,7 @@ else {
     var link = !!args.l;
     // @ts-ignore
     globalThis._minisys = {
-        _userAppOffset: link ? 1280 : 0,
+        _userAppOffset: link ? jOffset : 0,
     };
     if (!link) {
         var asmCode = fs_1.default.readFileSync(inFile).toString('utf-8').replace(/\r\n/g, '\n').trim();
@@ -72,6 +73,6 @@ else {
         fs_1.default.writeFileSync(path_1.default.join(outDir, 'dmem32.coe'), dataCoe);
         fs_1.default.writeFileSync(path_1.default.join(outDir, 'serial.txt'), convert_1.coeToTxt(textCoe, dataCoe));
         fs_1.default.writeFileSync(path_1.default.join(outDir, 'linked.asm'), allProgram);
-        stdoutPrint('[minisys-asm] Assembling done with linking.');
+        stdoutPrint("[minisys-asm] Assembling done with linking. jOffset = " + jOffset + " B.");
     }
 }
