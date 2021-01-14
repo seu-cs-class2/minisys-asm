@@ -88,6 +88,22 @@ export function textSegToCoe(textSeg: TextSeg, padTo = 64) {
 }
 
 /**
+ * 将数据段coe文件拆成四份以便四体交叉存储
+ * @param dataCoe 原数据段coe文件
+ */
+export function dataCoeSlice(dataCoe: string) {
+  let coes = Array(4).fill('memory_initialization_radix = 16;\nmemory_initialization_vector =\n')
+  let lines = dataCoe.split('\n')
+  lines.forEach((v, i) => {
+    if (i < 2 || !v.trim()) return
+    for (let j = 0; j < 4; j++) {
+      coes[j] += v.slice(6 - j * 2, 8 - j * 2) + ',\n'
+    }
+  })
+  return coes.map(v => v.slice(0, -2) + ';\n')
+}
+
+/**
  * 将两个coe文件并为可用UART串口写入的ASCII流文件
  */
 export function coeToTxt(programCoe: string, dataCoe: string) {
@@ -103,6 +119,6 @@ export function coeToTxt(programCoe: string, dataCoe: string) {
       .slice(2)
       .map(x => x.replace(/[,;]/g, ''))
       .join('')
-  const content = `${introSignal}${toStream(programCoe)}${toStream(dataCoe)}`
+  const content = `${introSignal}${toStream(programCoe)}${toStream(dataCoeSlice(dataCoe).join())}`
   return content
 }

@@ -4,7 +4,7 @@
  * by Withod, z0gSh1u @ 2020-10
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.coeToTxt = exports.textSegToCoe = exports.dataSegToCoe = void 0;
+exports.coeToTxt = exports.dataCoeSlice = exports.textSegToCoe = exports.dataSegToCoe = void 0;
 var utils_1 = require("./utils");
 /**
  * 数据段转coe文件
@@ -87,6 +87,23 @@ function textSegToCoe(textSeg, padTo) {
 }
 exports.textSegToCoe = textSegToCoe;
 /**
+ * 将数据段coe文件拆成四份以便四体交叉存储
+ * @param dataCoe 原数据段coe文件
+ */
+function dataCoeSlice(dataCoe) {
+    var coes = Array(4).fill('memory_initialization_radix = 16;\nmemory_initialization_vector =\n');
+    var lines = dataCoe.split('\n');
+    lines.forEach(function (v, i) {
+        if (i < 2 || !v.trim())
+            return;
+        for (var j = 0; j < 4; j++) {
+            coes[j] += v.slice(6 - j * 2, 8 - j * 2) + ',\n';
+        }
+    });
+    return coes.map(function (v) { return v.slice(0, -2) + ';\n'; });
+}
+exports.dataCoeSlice = dataCoeSlice;
+/**
  * 将两个coe文件并为可用UART串口写入的ASCII流文件
  */
 function coeToTxt(programCoe, dataCoe) {
@@ -103,7 +120,7 @@ function coeToTxt(programCoe, dataCoe) {
             .map(function (x) { return x.replace(/[,;]/g, ''); })
             .join('');
     };
-    var content = "" + introSignal + toStream(programCoe) + toStream(dataCoe);
+    var content = "" + introSignal + toStream(programCoe) + toStream(dataCoeSlice(dataCoe).join());
     return content;
 }
 exports.coeToTxt = coeToTxt;

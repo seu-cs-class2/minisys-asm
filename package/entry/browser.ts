@@ -8,7 +8,7 @@
 
 import { Ace } from '../typing/ace'
 import { AsmProgram, assemble as _assemble } from '../assembler'
-import { coeToTxt, dataSegToCoe, textSegToCoe } from '../convert'
+import { coeToTxt, dataCoeSlice, dataSegToCoe, textSegToCoe } from '../convert'
 import { assert, binToHex, hexToBin } from '../utils'
 
 import _MinisysBIOS from '../snippet/minisys-bios.asm'
@@ -144,7 +144,12 @@ window.addEventListener('load', () => {
     }
     try {
       const result = assemble(editor.getValue(), link)
-      downloadFile(dataSegToCoe(result.dataSeg), 'dmem32.coe')
+      const dataCoe = dataSegToCoe(result.dataSeg)
+      const dataCoes = dataCoeSlice(dataCoe)
+      downloadFile(dataCoe, 'dmem32.coe')
+      for (let i = 0; i < 4; i++) {
+        downloadFile(dataCoes[i], `ram${i}.coe`)
+      }
       downloadFile(textSegToCoe(result.textSeg), 'prgmip32.coe')
       setStatus('success')
     } catch (ex) {

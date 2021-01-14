@@ -138,7 +138,12 @@ window.addEventListener('load', function () {
         };
         try {
             var result = assemble(editor.getValue(), link);
-            downloadFile(convert_1.dataSegToCoe(result.dataSeg), 'dmem32.coe');
+            var dataCoe = convert_1.dataSegToCoe(result.dataSeg);
+            var dataCoes = convert_1.dataCoeSlice(dataCoe);
+            downloadFile(dataCoe, 'dmem32.coe');
+            for (var i = 0; i < 4; i++) {
+                downloadFile(dataCoes[i], "ram" + i + ".coe");
+            }
             downloadFile(convert_1.textSegToCoe(result.textSeg), 'prgmip32.coe');
             setStatus('success');
         }

@@ -6,7 +6,7 @@
 import fs from 'fs'
 import path from 'path'
 import { assemble } from '../assembler'
-import { coeToTxt, dataSegToCoe, textSegToCoe } from '../convert'
+import { coeToTxt, dataCoeSlice, dataSegToCoe, textSegToCoe } from '../convert'
 import { linkAll } from '../linker'
 import { assert, SeuError } from '../utils'
 
@@ -34,8 +34,12 @@ try {
       const asmCode = fs.readFileSync(inFile).toString('utf-8').replace(/\r\n/g, '\n').trim()
       const asmResult = assemble(asmCode)
       const dataCoe = dataSegToCoe(asmResult.dataSeg)
+      const dataCoes = dataCoeSlice(dataCoe)
       const textCoe = textSegToCoe(asmResult.textSeg)
-      fs.writeFileSync(path.join(outDir, 'dmem32.coe'), dataCoe)
+      // fs.writeFileSync(path.join(outDir, 'dmem32.coe'), dataCoe)
+      for (let i = 0; i < 3; i++) {
+        fs.writeFileSync(path.join(outDir, `ram${i}.coe`), dataCoes[i])
+      }
       fs.writeFileSync(path.join(outDir, 'prgmip32.coe'), textCoe)
       fs.writeFileSync(path.join(outDir, 'serial.txt'), coeToTxt(textCoe, dataCoe))
       stdoutPrint('[minisys-asm] Assembling done.')
@@ -67,9 +71,13 @@ try {
       const all = assemble(allProgram)
       const textCoe = textSegToCoe(all.textSeg)
       const dataCoe = dataSegToCoe(all.dataSeg)
+      const dataCoes = dataCoeSlice(dataCoe)
       // 输出
       fs.writeFileSync(path.join(outDir, 'prgmip32.coe'), textCoe)
-      fs.writeFileSync(path.join(outDir, 'dmem32.coe'), dataCoe)
+      // fs.writeFileSync(path.join(outDir, 'dmem32.coe'), dataCoe)
+      for (let i = 0; i < 3; i++) {
+        fs.writeFileSync(path.join(outDir, `ram${i}.coe`), dataCoes[i])
+      }
       fs.writeFileSync(path.join(outDir, 'serial.txt'), coeToTxt(textCoe, dataCoe))
       fs.writeFileSync(path.join(outDir, 'linked.asm'), allProgram)
       stdoutPrint(`[minisys-asm] Assembling done with linking. jOffset = ${jOffset} B.`)

@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.assemble = exports.parseOneLine = exports.parseTextSeg = exports.expandMacros = exports.parseDataSeg = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
+exports.assemble = exports.parseOneLine = exports.parseTextSeg = exports.expandMacros = exports.parseDataSeg = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = exports.userAddrOffset = void 0;
 var unraw_1 = __importDefault(require("unraw"));
 var instruction_1 = require("./instruction");
 var macro_1 = require("./macro");

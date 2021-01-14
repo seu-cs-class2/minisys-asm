@@ -36,8 +36,12 @@ try {
             var asmCode = fs_1.default.readFileSync(inFile).toString('utf-8').replace(/\r\n/g, '\n').trim();
             var asmResult = assembler_1.assemble(asmCode);
             var dataCoe = convert_1.dataSegToCoe(asmResult.dataSeg);
+            var dataCoes = convert_1.dataCoeSlice(dataCoe);
             var textCoe = convert_1.textSegToCoe(asmResult.textSeg);
-            fs_1.default.writeFileSync(path_1.default.join(outDir, 'dmem32.coe'), dataCoe);
+            // fs.writeFileSync(path.join(outDir, 'dmem32.coe'), dataCoe)
+            for (var i = 0; i < 3; i++) {
+                fs_1.default.writeFileSync(path_1.default.join(outDir, "ram" + i + ".coe"), dataCoes[i]);
+            }
             fs_1.default.writeFileSync(path_1.default.join(outDir, 'prgmip32.coe'), textCoe);
             fs_1.default.writeFileSync(path_1.default.join(outDir, 'serial.txt'), convert_1.coeToTxt(textCoe, dataCoe));
             stdoutPrint('[minisys-asm] Assembling done.');
@@ -69,9 +73,13 @@ try {
             var all = assembler_1.assemble(allProgram);
             var textCoe = convert_1.textSegToCoe(all.textSeg);
             var dataCoe = convert_1.dataSegToCoe(all.dataSeg);
+            var dataCoes = convert_1.dataCoeSlice(dataCoe);
             // 输出
             fs_1.default.writeFileSync(path_1.default.join(outDir, 'prgmip32.coe'), textCoe);
-            fs_1.default.writeFileSync(path_1.default.join(outDir, 'dmem32.coe'), dataCoe);
+            // fs.writeFileSync(path.join(outDir, 'dmem32.coe'), dataCoe)
+            for (var i = 0; i < 3; i++) {
+                fs_1.default.writeFileSync(path_1.default.join(outDir, "ram" + i + ".coe"), dataCoes[i]);
+            }
             fs_1.default.writeFileSync(path_1.default.join(outDir, 'serial.txt'), convert_1.coeToTxt(textCoe, dataCoe));
             fs_1.default.writeFileSync(path_1.default.join(outDir, 'linked.asm'), allProgram);
             stdoutPrint("[minisys-asm] Assembling done with linking. jOffset = " + jOffset + " B.");
