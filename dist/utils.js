@@ -3,15 +3,36 @@
  * Utilities
  * by Withod, z0gSh1u @ 2020-10
  */
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOffsetAddr = exports.getOffset = exports.sizeof = exports.serialString = exports.hexToBin = exports.hexToDec = exports.decToHex = exports.binToHex = exports.decToBin = exports.literalToBin = exports.varToAddrBin = exports.labelToBin = exports.assert = void 0;
+exports.getOffsetAddr = exports.getOffset = exports.sizeof = exports.serialString = exports.hexToBin = exports.hexToDec = exports.decToHex = exports.binToHex = exports.decToBin = exports.literalToBin = exports.varToAddrBin = exports.labelToBin = exports.assert = exports.SeuError = void 0;
 var assembler_1 = require("./assembler");
+var SeuError = /** @class */ (function (_super) {
+    __extends(SeuError, _super);
+    function SeuError() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return SeuError;
+}(Error));
+exports.SeuError = SeuError;
 /**
- * Ensure `ensure`, else throw `Error(hint)`.
+ * Ensure `ensure`, else throw `SeuError(hint)`.
  */
 function assert(ensure, hint) {
     if (!ensure) {
-        throw new Error(hint);
+        throw new SeuError(hint);
     }
 }
 exports.assert = assert;
@@ -23,10 +44,13 @@ exports.assert = assert;
  * @param signExt 转换后位数不足时是否进行符号扩展，默认采用零扩展
  */
 function labelToBin(label, len, isOffset, signExt) {
+    var _a;
     if (signExt === void 0) { signExt = false; }
     try {
         if (!isOffset) {
-            return decToBin(parseInt(literalToBin(label, len, signExt), 2) + assembler_1.userAddrOffset, len, signExt).slice(-len);
+            return decToBin(
+            // @ts-ignore
+            parseInt(literalToBin(label, len, signExt), 2) + (((_a = globalThis === null || globalThis === void 0 ? void 0 : globalThis._minisys) === null || _a === void 0 ? void 0 : _a._userAppOffset) || 0), len, signExt).slice(-len);
         }
         else {
             return literalToBin(label, len, signExt).slice(-len);
@@ -184,4 +208,3 @@ function getOffsetAddr(baseAddr, offsetBit) {
     return base + offsetBit;
 }
 exports.getOffsetAddr = getOffsetAddr;
-//# sourceMappingURL=utils.js.map

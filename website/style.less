@@ -37,11 +37,11 @@ body {
 
 .content {
   width: 100%;
-  height: calc(100% - 52px);
+  height: calc(100% - 55px);
   display: flex;
   .left {
     height: 100%;
-    width: 50%;
+    width: 40%;
     #editor {
       height: 100%;
       width: 100%;
@@ -58,11 +58,24 @@ body {
     }
     .result {
       margin: 20px auto;
-      #asm-result {
+      .result-container {
         width: 100%;
-        font-size: 18px;
-        font-family: 'Courier New', Courier, monospace;
-        resize: none;
+        display: flex;
+        #asm-result-container,
+        #link-result-container {
+          width: 100%;
+          margin: auto 5px;
+        }
+        #asm-result,
+        #link-result {
+          width: 100%;
+          font-size: 18px;
+          font-family: 'Courier New', Courier, monospace;
+          resize: none;
+        }
+        #link-result {
+          font-size: 14px !important;
+        }
       }
     }
     .ops {
