@@ -1,0 +1,1 @@
+node entry/node.js F:/minisys-minicc-ts/src/output.asm F:/minisys-asm/temp -l

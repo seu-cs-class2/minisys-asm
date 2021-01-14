@@ -5,12 +5,14 @@
 
 import { getLabelAddr, getPC, getVarAddr, VarCompType } from './assembler'
 
+export class SeuError extends Error {}
+
 /**
- * Ensure `ensure`, else throw `Error(hint)`.
+ * Ensure `ensure`, else throw `SeuError(hint)`.
  */
 export function assert(ensure: unknown, hint?: string) {
   if (!ensure) {
-    throw new Error(hint)
+    throw new SeuError(hint)
   }
 }
 
@@ -23,7 +25,16 @@ export function assert(ensure: unknown, hint?: string) {
  */
 export function labelToBin(label: string, len: number, isOffset: boolean, signExt: boolean = false) {
   try {
-    return literalToBin(label, len, signExt).slice(-len)
+    if (!isOffset) {
+      return decToBin(
+        // @ts-ignore
+        parseInt(literalToBin(label, len, signExt), 2) + (globalThis?._minisys?._userAppOffset || 0),
+        len,
+        signExt
+      ).slice(-len)
+    } else {
+      return literalToBin(label, len, signExt).slice(-len)
+    }
   } catch (e) {
     return literalToBin((getLabelAddr(label) - (isOffset ? getPC() : 0)).toString(), len, isOffset).slice(-len)
   }

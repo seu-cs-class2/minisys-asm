@@ -33,12 +33,12 @@ body {
 }
 .content {
   width: 100%;
-  height: calc(100% - 52px);
+  height: calc(100% - 55px);
   display: flex;
 }
 .content .left {
   height: 100%;
-  width: 50%;
+  width: 40%;
 }
 .content .left #editor {
   height: 100%;
@@ -57,11 +57,24 @@ body {
 .content .right .result {
   margin: 20px auto;
 }
-.content .right .result #asm-result {
+.content .right .result .result-container {
+  width: 100%;
+  display: flex;
+}
+.content .right .result .result-container #asm-result-container,
+.content .right .result .result-container #link-result-container {
+  width: 100%;
+  margin: auto 5px;
+}
+.content .right .result .result-container #asm-result,
+.content .right .result .result-container #link-result {
   width: 100%;
   font-size: 18px;
   font-family: 'Courier New', Courier, monospace;
   resize: none;
+}
+.content .right .result .result-container #link-result {
+  font-size: 14px !important;
 }
 .content .right .ops {
   box-sizing: border-box;

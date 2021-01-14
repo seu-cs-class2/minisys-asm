@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.assemble = exports.parseOneLine = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
+exports.assemble = exports.parseOneLine = exports.parseTextSeg = exports.expandMacros = exports.parseDataSeg = exports.getPC = exports.getLabelAddr = exports.getVarAddr = exports.TextSeg = exports.DataSeg = void 0;
 var unraw_1 = __importDefault(require("unraw"));
 var instruction_1 = require("./instruction");
 var macro_1 = require("./macro");
@@ -287,6 +287,7 @@ function parseDataSeg(asm) {
     }
     return new DataSeg(startAddr, vars);
 }
+exports.parseDataSeg = parseDataSeg;
 /**
  * 展开代码段宏指令
  */
@@ -312,6 +313,7 @@ function expandMacros(asm_, lineno_) {
     });
     return asm;
 }
+exports.expandMacros = expandMacros;
 /**
  * 解析代码段
  * @param asm .text起，到代码段结束
@@ -353,6 +355,7 @@ function parseTextSeg(asm_, lineno) {
     });
     return new TextSeg(startAddr, ins, labels);
 }
+exports.parseTextSeg = parseTextSeg;
 /**
  * 解析单行汇编到Instruction对象
  */
@@ -402,9 +405,9 @@ function assemble(asm_) {
     // 挑出代码段和数据段
     var dataSegStartLine = asm.findIndex(function (v) { return v.match(/\.data/); });
     var textSegStartLine = asm.findIndex(function (v) { return v.match(/\.text/); });
-    utils_1.assert(dataSegStartLine !== -1, '未找到数据段开始。');
-    utils_1.assert(textSegStartLine !== -1, '未找到代码段开始。');
-    utils_1.assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后。');
+    utils_1.assert(dataSegStartLine !== -1, '未找到数据段开始');
+    utils_1.assert(textSegStartLine !== -1, '未找到代码段开始');
+    utils_1.assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后');
     // 解析数据段
     var dataSeg = parseDataSeg(asm.slice(dataSegStartLine, textSegStartLine));
     // 解析代码段
@@ -416,4 +419,3 @@ function assemble(asm_) {
 }
 exports.assemble = assemble;
 var templateObject_1, templateObject_2;
-//# sourceMappingURL=assembler.js.map

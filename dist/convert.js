@@ -107,4 +107,3 @@ function coeToTxt(programCoe, dataCoe) {
     return content;
 }
 exports.coeToTxt = coeToTxt;
-//# sourceMappingURL=convert.js.map

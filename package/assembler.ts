@@ -20,7 +20,7 @@ const VarCompTypeRegex = Object.keys(__VarCompType).join('|')
 /**
  * 汇编程序，由数据段和代码段构成
  */
-interface AsmProgram {
+export interface AsmProgram {
   dataSeg: DataSeg
   textSeg: TextSeg
 }
@@ -107,7 +107,7 @@ interface TextSegLabel {
  * 代码段
  */
 export class TextSeg {
-  private _startAddr: string // 开始抵制
+  private _startAddr: string // 开始地址
   private _ins: Instruction[] // 指令
   private _labels: TextSegLabel[] // 标签
 
@@ -171,7 +171,7 @@ export function getPC() {
  * 解析数据段
  * @param asm 从.data开始，到.text的前一行
  */
-function parseDataSeg(asm: string[]) {
+export function parseDataSeg(asm: string[]) {
   // 解析初始化值
   const parseInitValue = (type: VarCompType, init: string) => {
     assert(!(type !== 'ascii' && init.includes('"')), '字符串型数据只能使用.ascii类型')
@@ -315,7 +315,7 @@ function parseDataSeg(asm: string[]) {
 /**
  * 展开代码段宏指令
  */
-function expandMacros(asm_: string[], lineno_: number[]) {
+export function expandMacros(asm_: string[], lineno_: number[]) {
   let asm = Array.from(asm_)
   let ruleIdx = -1
   const macros = Object.keys(expansionRules)
@@ -342,7 +342,7 @@ function expandMacros(asm_: string[], lineno_: number[]) {
  * 解析代码段
  * @param asm .text起，到代码段结束
  */
-function parseTextSeg(asm_: string[], lineno: number[]) {
+export function parseTextSeg(asm_: string[], lineno: number[]) {
   // 先展开宏指令
   let asm = expandMacros(asm_, lineno)
   // 确定数据段起始地址
@@ -435,9 +435,9 @@ export function assemble(asm_: string) {
   // 挑出代码段和数据段
   const dataSegStartLine = asm.findIndex(v => v.match(/\.data/))
   const textSegStartLine = asm.findIndex(v => v.match(/\.text/))
-  assert(dataSegStartLine !== -1, '未找到数据段开始。')
-  assert(textSegStartLine !== -1, '未找到代码段开始。')
-  assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后。')
+  assert(dataSegStartLine !== -1, '未找到数据段开始')
+  assert(textSegStartLine !== -1, '未找到代码段开始')
+  assert(dataSegStartLine < textSegStartLine, '数据段不能位于代码段之后')
 
   // 解析数据段
   const dataSeg = parseDataSeg(asm.slice(dataSegStartLine, textSegStartLine))
