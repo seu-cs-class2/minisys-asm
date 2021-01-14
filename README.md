@@ -58,9 +58,4 @@ syscall
 
 ### 中断处理程序
 
-中断发生时，统一跳转到 [中断处理程序入口](./package/snippet/minisys-interrupt-entry.asm)（0x0000F000），在这里，判断中断类型，进行派发。目前支持的中断类型如下：
-
-| 中断类型 | Cause 2-6 (ExcCode[4:0]) | 说明                                                         |
-| -------- | ------------------------ | ------------------------------------------------------------ |
-| syscall  | 01000                    | 系统调用中断。进一步跳转到 minisys-interrupt-handler 的 __int_handler_syscall 判断系统调用类型。系统调用类型存放在 $v0 中，目前的系统调用安排是：<br>0 号 syscall：用户程序运行结束，反复闪灯提示。 |
-
+中断发生时，统一跳转到 [中断处理程序入口](./package/snippet/minisys-interrupt-entry.asm)（0x0000F000），在这里，判断中断类型，进行派发。
