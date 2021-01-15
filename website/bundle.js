@@ -202,7 +202,7 @@ eval("\r\n/**\r\n * Minisys寄存器定义\r\n * by Withod, z0gSh1u @ 2020-10\r\
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = (\"# ====== minisys-bios.asm ======\\njal main\\nnop\\naddi $v0, $zero, 0\\nsyscall\\n# ====== minisys-bios.asm ======\\n\");\n\n//# sourceURL=webpack:///./package/snippet/minisys-bios.asm?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = (\"# ====== minisys-bios.asm ======\\r\\n    lui $sp, 1 # init $sp\\r\\n    # -----------------------------\\r\\n    addi $s1,$zero,0xFFFF\\r\\n    addi $s7,$zero,0xFC60   # LED基址\\r\\n    sw\\t $s1,0($s7)         # LED全亮\\r\\n    lui  $s5,8   # 数码管刷新0.5s的8\\r\\n    addi $s1,$zero,8\\r\\n    addi $s2,$zero,0\\r\\n    addi $s3,$zero,0xFC00   # 段码基址\\r\\n    addi $s4,$zero,0xFC04   # 位码基址\\r\\n    addi $s6,$zero,8\\r\\n_bios_label1:\\r\\n    sw   $s1,0($s3)\\r\\n    sw   $s2,0($s4)\\r\\n    addi $s2,$s2,1\\r\\n    beq  $s2,$s6,_bios_label2   # 位码逢8归0\\r\\n    nop\\r\\n    j    _bios_label1\\r\\n    nop\\r\\n_bios_label2:\\r\\n    addi $s2,$zero,0\\r\\n    addi $s5,$s5,-1             # 刷一遍计数-1\\r\\n    beq  $s5,$zero,_bios_label3\\r\\n    nop\\r\\n    j    _bios_label1\\r\\n    nop\\r\\n_bios_label3:\\r\\n    sw   $zero,0($s7)           # 关LED\\r\\n    # -----------------------------\\r\\n    jal main\\r\\n    nop\\r\\n    addi $v0, $zero, 0\\r\\n    syscall\\r\\n# ====== minisys-bios.asm ======\\r\\n\");\n\n//# sourceURL=webpack:///./package/snippet/minisys-bios.asm?");
 
 /***/ }),
 
@@ -214,7 +214,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ 
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = (\"# ===== minisys-interrupt-handler-entry.asm =====\\nmfc0 $t0, $13, 0 # $t0 <- CP0 Cause\\nandi $t1, $t0, 0x007C # keep only ExcCode[4:0] at Cause 2-6\\naddi $t2, $zero, 0x0020 # Cause 2-6 of syscall is 01000\\nbeq $t1, $t2, __int_handler_syscall\\nnop\\n# ===== minisys-interrupt-handler-entry.asm =====\\n\");\n\n//# sourceURL=webpack:///./package/snippet/minisys-interrupt-entry.asm?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = (\"# ===== minisys-interrupt-handler-entry.asm =====\\r\\nmfc0 $t0, $13, 0        # $t0 <- CP0 Cause\\r\\nandi $t1, $t0, 0x007C   # keep only ExcCode[4:0] at Cause 2-6\\r\\naddi $t2, $zero, 0x0020 # Cause 2-6 of syscall is 01000\\r\\nbeq $t1, $t2, _int_handler_syscall\\r\\nnop\\r\\n# ===== minisys-interrupt-handler-entry.asm =====\\r\\n\");\n\n//# sourceURL=webpack:///./package/snippet/minisys-interrupt-entry.asm?");
 
 /***/ }),
 
@@ -226,7 +226,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ 
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = (\"__int_handler_syscall:\\n  # handler of syscall\\n  # $v0 stores syscall type\\n__int_handler_syscall_0:\\n  # 0 means user application is finished\\n  bne $v0, $zero, __int_handler_default\\n  nop\\n  # just flash all leds\\n  addiu $t0, $zero, 0xFC60\\n__int_handler_syscall_0_label1:\\n  # light all up\\n  addiu $t1, $zero, 0xFFFF\\n  sw $t1, 0($t0)\\n  nop\\n  nop\\n  # delay 1s (prepare 6666666 D)\\n  lui\\t$t2, 101\\n\\tori\\t$t2, $t2, 47530\\n__int_handler_syscall_0_label2:\\n  addiu $t2, $t2, -1\\n  bne $t2, $zero, __int_handler_syscall_0_label2\\n  nop\\n  # all down\\n  sw $zero, 0($t0)\\n  nop\\n  nop\\n  # delay 1s (prepare 6666666 D)\\n  lui\\t$t2, 101\\n\\tori\\t$t2, $t2, 47530\\n__int_handler_syscall_0_label3:\\n  addiu $t2, $t2, -1\\n  bne $t2, $zero, __int_handler_syscall_0_label3\\n  nop\\n  j __int_handler_syscall_0_label1\\n  nop\\n__int_handler_default:\\n  nop\\n\");\n\n//# sourceURL=webpack:///./package/snippet/minisys-interrupt-handler.asm?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = (\"_int_handler_syscall:\\r\\n  # handler of syscall\\r\\n  # $v0 stores syscall type\\r\\n  # just light all leds\\r\\n  push $t0\\r\\n  push $t1\\r\\n  addi $t0, $zero, 0xFFFF\\r\\n  addi $t1, $zero, 0xFC60\\r\\n  sw $t0, 0($t1)\\r\\n  nop\\r\\n  nop\\r\\n  pop $t1\\r\\n  pop $t0\\r\\n  eret\\r\\n\");\n\n//# sourceURL=webpack:///./package/snippet/minisys-interrupt-handler.asm?");
 
 /***/ }),
 
