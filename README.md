@@ -48,6 +48,8 @@ Minisys 体系使用哈佛结构，指令 MEM 有 64 KB，按字节编址。因�
 
 [BIOS](./package/snippet/minisys-bios.asm) 负责初始化各部件，检测各部件能否正确运行，最后跳转到用户程序处。由于没有操作系统，故 BIOS 会被拼接到用户程序前。在调用完用户程序后，发中断，提示程序执行完成。
 
+当前 BIOS 的主要检查特征是在数码管显示 “SEU09172”，即我们的班号。
+
 ```assembly
 # ...
 jal main
