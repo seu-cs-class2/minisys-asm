@@ -16,7 +16,7 @@ _bios_label1:
     sw   $s1,0($s3)
     sw   $s2,0($s4)
     nop
-    # nop
+    nop
     sw   $s6,0($s4)
     nop
     addi $s1,$zero,14       # E
@@ -24,7 +24,7 @@ _bios_label1:
     sw   $s1,0($s3)
     sw   $s2,0($s4)
     nop
-    # nop
+    nop
     sw   $s6,0($s4)
     nop
     addi $s1,$zero,16       # U
@@ -32,7 +32,7 @@ _bios_label1:
     sw   $s1,0($s3)
     sw   $s2,0($s4)
     nop
-    # nop
+    nop
     sw   $s6,0($s4)
     nop
     addi $s1,$zero,0        # 0
@@ -40,7 +40,7 @@ _bios_label1:
     sw   $s1,0($s3)
     sw   $s2,0($s4)
     nop
-    # nop
+    nop
     sw   $s6,0($s4)
     nop
     addi $s1,$zero,9        # 9
@@ -48,7 +48,7 @@ _bios_label1:
     sw   $s1,0($s3)
     sw   $s2,0($s4)
     nop
-    # nop
+    nop
     sw   $s6,0($s4)
     nop
     addi $s1,$zero,1        # 1
@@ -56,7 +56,7 @@ _bios_label1:
     sw   $s1,0($s3)
     sw   $s2,0($s4)
     nop
-    # nop
+    nop
     sw   $s6,0($s4)
     nop
     addi $s1,$zero,7        # 7
@@ -64,7 +64,7 @@ _bios_label1:
     sw   $s1,0($s3)
     sw   $s2,0($s4)
     nop
-    # nop
+    nop
     sw   $s6,0($s4)
     nop
     addi $s1,$zero,2        # 2
@@ -72,7 +72,7 @@ _bios_label1:
     sw   $s1,0($s3)
     sw   $s2,0($s4)
     nop
-    # nop
+    nop
     sw   $s6,0($s4)
     nop
     addi $s5,$s5,-1             # 刷一遍计数-1
